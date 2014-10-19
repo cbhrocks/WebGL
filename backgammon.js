@@ -7,6 +7,9 @@ var blackBoardPoints = [];
 var redBoardPoints = [];
 var rectangleBoardPoints = [];
 
+var redTriangles = [];
+var blackTriangles = [];
+
 var color;
 var colorLoc;
 var isNot;
@@ -38,8 +41,11 @@ window.onload = function init()
     color = vec4 (0.0, 0.0, 0.0, 1.0);
     colorLoc = gl.getUniformLocation (program, "color");
 
-    setTriangleCoords(1, "red", "black");
-    setTriangleCoords(-1, "black", "red");
+    // setTriangleCoords(1, "red", "black");
+    // setTriangleCoords(-1, "black", "red");
+    setTriangles(1, "red", "black");
+    setTriangles(-1, "black", "red");
+    setCoords();
     setRectangleBoardCoords();
 
     var blackBufferId = gl.createBuffer();
@@ -77,21 +83,37 @@ window.onload = function init()
     renderRectangleBoard();
 
     canvas.addEventListener ("click", function(event) {
-        var x = -1 + 2*(event.clientX-80)/canvas.width;
-        var y = -1 + 2*(canvas.height-event.clientY + 8)/canvas.height;
-        // var points = create_and_or_gate(x, y);
-        if (isNot){
-            create_not_gate(x,y);
+        var x = -1 + 2*(event.clientX)/canvas.width;
+        var y = -1 + 2*(canvas.height-event.clientY)/canvas.height;
+        //console.log(y);
+        for (var i = 0; i < redTriangles.length; i++) {
+            if (redTriangles[i].hitTest(x,y)) {
+                console.log("Clicked a red triangle");
+            }
         }
-        else if (isAnd){
-            create_and_gate(x,y);
+        for (var i = 0; i < blackTriangles.length; i++) {
+            if (blackTriangles[i].hitTest(x,y)) {
+                console.log("Clicked a black triangle");
+            }
         }
-        else if (isOr){
-            create_or_gate(x,y);
-        }
-        gl.bufferSubData (gl.ARRAY_BUFFER, points, flatten(points));
-        // render();
     });
+
+    // canvas.addEventListener ("click", function(event) {
+    //     var x = -1 + 2*(event.clientX-80)/canvas.width;
+    //     var y = -1 + 2*(canvas.height-event.clientY + 8)/canvas.height;
+    //     // var points = create_and_or_gate(x, y);
+    //     if (isNot){
+    //         create_not_gate(x,y);
+    //     }
+    //     else if (isAnd){
+    //         create_and_gate(x,y);
+    //     }
+    //     else if (isOr){
+    //         create_or_gate(x,y);
+    //     }
+    //     gl.bufferSubData (gl.ARRAY_BUFFER, points, flatten(points));
+    //     // render();
+    // });
 
     // var menu = document.getElementById ("gateMenu");
     // menu.addEventListener ("click", function () {
@@ -141,7 +163,7 @@ function render() {
 }
 
 
-// height of triangle = 3/8 board height
+// height of triangle = 7/16 board height
 // width of triangle = 1/14 board width
 function setTriangleCoords(sign, color1, color2) {
     for (var i = 0; i < 7; i++) {
@@ -199,6 +221,99 @@ function setTriangleCoords(sign, color1, color2) {
     }
 }
 
+function setCoords() {
+    var length = redTriangles.length;
+    for (var i = 0; i < length; i++) {
+        redBoardPoints.push(redTriangles[i].vertexA);
+        redBoardPoints.push(redTriangles[i].vertexB);
+        redBoardPoints.push(redTriangles[i].vertexC);
+    }
+
+    for (var i = 0; i < length; i++) {
+        blackBoardPoints.push(blackTriangles[i].vertexA);
+        blackBoardPoints.push(blackTriangles[i].vertexB);
+        blackBoardPoints.push(blackTriangles[i].vertexC);
+    }
+}
+
+function setTriangles(sign, color1, color2) {
+    for (var i = 0; i < 7; i++) {
+        
+        var leftBound = (7-1-i)/7;
+        var rightBound = (7-i)/7;
+
+        var topBound = 1;
+        var bottomBound = 1/8;
+
+        if (sign===1) {
+            topBound = -1/8;
+            bottomBound = -1;
+        }
+
+        
+        var p1 = vec2((7-i)/7, sign * -1);
+        var p2 = vec2((7-1-i)/7, sign * -1);
+        var p3 = vec2((13-2*i)/14, sign * -1/8);
+        var triangle;
+        
+        if (i%2===0) {
+            triangle = new Triangle(p1, p2, p3, color1, leftBound, rightBound, topBound, bottomBound);
+            eval(color1+'Triangles').push(triangle);
+        } else {
+            triangle = new Triangle(p1, p2, p3, color2, leftBound, rightBound, topBound, bottomBound);
+            eval(color2+'Triangles').push(triangle);
+        }
+        
+        leftBound = i/7;
+        rightBound = (i+1)/7;
+
+        p1 = vec2(i/7, sign * -1);
+        p2 = vec2((i+1)/7, sign * -1);
+        p3 = vec2((2*i+1)/14, sign * -1/8);
+        
+        if (i%2===0) {
+            triangle = new Triangle(p1, p2, p3, color1, leftBound, rightBound, topBound, bottomBound);
+            eval(color1+'Triangles').push(triangle);
+        } else {
+            triangle = new Triangle(p1, p2, p3, color2, leftBound, rightBound, topBound, bottomBound);
+            eval(color2+'Triangles').push(triangle);
+        }
+    }
+
+    for (i = 0; i < 7; i++) {
+        
+        leftBound = -(7-1-i)/7;
+        rightBound = -(7-i)/7;
+        
+        p1 = vec2(-(7-i)/7, sign * -1);
+        p2 = vec2(-(7-1-i)/7, sign * -1);
+        p3 = vec2(-(13-2*i)/14, sign * -1/8);
+        
+        if (i%2===0) {
+            triangle = new Triangle(p1, p2, p3, color1, leftBound, rightBound, topBound, bottomBound);
+            eval(color1+'Triangles').push(triangle);
+        } else {
+            triangle = new Triangle(p1, p2, p3, color2, leftBound, rightBound, topBound, bottomBound);
+            eval(color2+'Triangles').push(triangle);
+        }
+
+        leftBound = i/7;
+        rightBound = (i+1)/7;
+
+        p1 = vec2(i/7, sign * -1);
+        p2 = vec2((i+1)/7, sign * -1);
+        p3 = vec2((2*i+1)/14, sign * -1/8);
+
+        if (i%2===0) {
+            triangle = new Triangle(p1, p2, p3, color1, leftBound, rightBound, topBound, bottomBound);
+            eval(color1+'Triangles').push(triangle);
+        } else {
+            triangle = new Triangle(p1, p2, p3, color2, leftBound, rightBound, topBound, bottomBound);
+            eval(color2+'Triangles').push(triangle);
+        }
+    }
+}
+
 function setRectangleBoardCoords() {
     var p1 = vec2(-1/7, 1);
     var p2 = vec2(-1/7, -1);
@@ -225,4 +340,44 @@ function setRectangleBoardCoords() {
     rectangleBoardPoints.push(p1);
     rectangleBoardPoints.push(p2);
     rectangleBoardPoints.push(p3);
+}
+
+function Triangle(a, b, c, color, element, leftBound, rightBound, topBound, bottomBound) {
+    this.vertexA = a;
+    this.vertexB = b;
+    this.vertexC = c;
+    this.leftBound = leftBound
+    this.rightBound = rightBound;
+    this.topBound = topBound;
+    this.bottomBound = bottomBound;
+
+    this.shade = color;
+    // this.onClick1 = function(event) {
+    //     console.log("Clicked a triangle");
+    // };
+    // this.onClick2 = function(event) {
+    //     console.log("Clicked a triangle");
+    // };
+    // element.addEventListener('click', this.onClick1, false);
+    // element.addEventListener('click', this.onClick2, false);
+
+    this.hitTest = function (x, y) {
+
+        var inWidthBox = false;
+        var inLengthBox = false;
+
+        if (x < this.leftBound && x > this.rightBound) {
+            inWidthBox = true;
+        }
+
+        if (y > this.bottomBound && y < this.topBound) {
+            inLengthBox = true;
+        }
+        
+        return inWidthBox //&& inLengthBox;
+    };
+}
+
+function sayClicked(event) {
+    console.log("Click event");
 }
