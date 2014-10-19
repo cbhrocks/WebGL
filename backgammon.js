@@ -38,10 +38,10 @@ window.onload = function init()
     color = vec4 (0.0, 0.0, 0.0, 1.0);
     colorLoc = gl.getUniformLocation (program, "color");
 
-    setTriangleCoords(1);
-    setTriangleCoords(-1);
-    //setBlackTriangleCoords();
-    //setRedTriangleCoords();
+    // setTriangleCoords(1);
+    // setTriangleCoords(-1);
+    setBlackTriangleCoords();
+    setRedTriangleCoords();
     setRectangleBoardCoords();
 
     var blackBufferId = gl.createBuffer();
