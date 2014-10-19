@@ -6,6 +6,8 @@ var points = [];
 var blackBoardPoints = [];
 var redBoardPoints = [];
 var rectangleBoardPoints = [];
+var redPieces = [];
+var blackPieces
 
 var color;
 var colorLoc;
@@ -13,10 +15,7 @@ var isNot;
 var isAnd;
 var isOr;
 
-window.onload = function init()
-
-
-{
+window.onload = function init() {
     var canvas = document.getElementById( "gl-canvas" );
     
     gl = WebGLUtils.setupWebGL( canvas );
@@ -34,7 +33,6 @@ window.onload = function init()
     gl.useProgram( program );
     
     // Load the data into the GPU
-    // var points = create_and_or_gate(x, y);
     color = vec4 (0.0, 0.0, 0.0, 1.0);
     colorLoc = gl.getUniformLocation (program, "color");
 
@@ -225,4 +223,25 @@ function setRectangleBoardCoords() {
     rectangleBoardPoints.push(p1);
     rectangleBoardPoints.push(p2);
     rectangleBoardPoints.push(p3);
+}
+
+function GamePiece(color, row, column) {
+    this.color = color;
+    this.row = row;
+    this.column = column;
+}
+
+GamePiece.prototype.draw = function(){
+
+};
+
+GamePiece.prototype.setLocation = function(row, column){
+    this.row = row;
+    this.column = column;
+};
+
+function createGamePieceArray(){
+    for (var i = 0; i < 2; i++){
+
+    }
 }
