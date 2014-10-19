@@ -171,10 +171,10 @@ function setTriangleCoords(sign, color1, color2) {
         }
     }
 
-    for (var i = 0; i < 7; i++) {
-        var p1 = vec2(-(7-i)/7, sign * -1);
-        var p2 = vec2(-(7-1-i)/7, sign * -1);
-        var p3 = vec2(-(13-2*i)/14, sign * -1/8);
+    for (i = 0; i < 7; i++) {
+        p1 = vec2(-(7-i)/7, sign * -1);
+        p2 = vec2(-(7-1-i)/7, sign * -1);
+        p3 = vec2(-(13-2*i)/14, sign * -1/8);
         if (i%2===0) {
             eval(color1+'BoardPoints').push(p1);
             eval(color1+'BoardPoints').push(p2);
@@ -208,7 +208,7 @@ function setRectangleBoardCoords() {
     rectangleBoardPoints.push(p3);
     p1 = vec2(-1/7, -1);
     p2 = vec2(0, 1);
-    p3 = vec2(0, -1)
+    p3 = vec2(0, -1);
     rectangleBoardPoints.push(p1);
     rectangleBoardPoints.push(p2);
     rectangleBoardPoints.push(p3);
@@ -221,7 +221,7 @@ function setRectangleBoardCoords() {
     rectangleBoardPoints.push(p3);
     p1 = vec2(6/7, -1);
     p2 = vec2(1, 1);
-    p3 = vec2(1, -1)
+    p3 = vec2(1, -1);
     rectangleBoardPoints.push(p1);
     rectangleBoardPoints.push(p2);
     rectangleBoardPoints.push(p3);
