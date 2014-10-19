@@ -38,10 +38,10 @@ window.onload = function init()
     color = vec4 (0.0, 0.0, 0.0, 1.0);
     colorLoc = gl.getUniformLocation (program, "color");
 
-    // setTriangleCoords(1);
-    // setTriangleCoords(-1);
-    setBlackTriangleCoords();
-    setRedTriangleCoords();
+    setTriangleCoords(1, "red", "black");
+    setTriangleCoords(-1, "black", "red");
+    // setBlackTriangleCoords();
+    // setRedTriangleCoords();
     setRectangleBoardCoords();
 
     var blackBufferId = gl.createBuffer();
@@ -142,212 +142,65 @@ function render() {
     requestAnimFrame (render);
 }
 
-function setTriangleCoords(sign) {
+
+// height of triangle = 3/8 board height
+// width of triangle = 1/14 board width
+function setTriangleCoords(sign, color1, color2) {
     for (var i = 0; i < 7; i++) {
         var p1 = vec2((7-i)/7, sign * -1);
         var p2 = vec2((7-1-i)/7, sign * -1);
         var p3 = vec2((13-2*i)/14, sign * -1/8);
-        if (sign=== -1 && i%2===0) {
-            redBoardPoints.push(p1);
-            redBoardPoints.push(p2);
-            redBoardPoints.push(p3);
-        } else {
-            blackBoardPoints.push(p1);
-            blackBoardPoints.push(p2);
-            blackBoardPoints.push(p3);
-        }
-        var p1 = vec2(i/7, sign * -1);
-        var p2 = vec2((i+1)/7, sign * -1);
-        var p3 = vec2((2*i+1)/14, sign * -1/8);
         if (i%2===0) {
-            redBoardPoints.push(p1);
-            redBoardPoints.push(p2);
-            redBoardPoints.push(p3);
+            eval(color1+'BoardPoints').push(p1);
+            eval(color1+'BoardPoints').push(p2);
+            eval(color1+'BoardPoints').push(p3);
         } else {
-            blackBoardPoints.push(p1);
-            blackBoardPoints.push(p2);
-            blackBoardPoints.push(p3);
+            eval(color2+'BoardPoints').push(p1);
+            eval(color2+'BoardPoints').push(p2);
+            eval(color2+'BoardPoints').push(p3);
+        }
+        p1 = vec2(i/7, sign * -1);
+        p2 = vec2((i+1)/7, sign * -1);
+        p3 = vec2((2*i+1)/14, sign * -1/8);
+        if (i%2===0) {
+            eval(color1+'BoardPoints').push(p1);
+            eval(color1+'BoardPoints').push(p2);
+            eval(color1+'BoardPoints').push(p3);
+        } else {
+            eval(color2+'BoardPoints').push(p1);
+            eval(color2+'BoardPoints').push(p2);
+            eval(color2+'BoardPoints').push(p3);
+        }
+    }
+
+    for (var i = 0; i < 7; i++) {
+        var p1 = vec2(-(7-i)/7, sign * -1);
+        var p2 = vec2(-(7-1-i)/7, sign * -1);
+        var p3 = vec2(-(13-2*i)/14, sign * -1/8);
+        if (i%2===0) {
+            eval(color1+'BoardPoints').push(p1);
+            eval(color1+'BoardPoints').push(p2);
+            eval(color1+'BoardPoints').push(p3);
+        } else {
+            eval(color2+'BoardPoints').push(p1);
+            eval(color2+'BoardPoints').push(p2);
+            eval(color2+'BoardPoints').push(p3);
+        }
+        p1 = vec2(i/7, sign * -1);
+        p2 = vec2((i+1)/7, sign * -1);
+        p3 = vec2((2*i+1)/14, sign * -1/8);
+        if (i%2===0) {
+            eval(color1+'BoardPoints').push(p1);
+            eval(color1+'BoardPoints').push(p2);
+            eval(color1+'BoardPoints').push(p3);
+        } else {
+            eval(color2+'BoardPoints').push(p1);
+            eval(color2+'BoardPoints').push(p2);
+            eval(color2+'BoardPoints').push(p3);
         }
     }
 }
 
-// height of triangle = 3/8 board height
-// width of triangle = 1/14 board width
-function setBlackTriangleCoords() {
-    var p1 = vec2(-6/7, -1);
-    var p2 = vec2(-5/7, -1);
-    var p3 = vec2(-11/14, -1/8)
-    blackBoardPoints.push(p1);
-    blackBoardPoints.push(p2);
-    blackBoardPoints.push(p3);
-    var p1 = vec2(-4/7, -1);
-    var p2 = vec2(-3/7, -1);
-    var p3 = vec2(-7/14, -1/8)
-    blackBoardPoints.push(p1);
-    blackBoardPoints.push(p2);
-    blackBoardPoints.push(p3);
-    var p1 = vec2(-2/7, -1);
-    var p2 = vec2(-1/7, -1);
-    var p3 = vec2(-3/14, -1/8)
-    blackBoardPoints.push(p1);
-    blackBoardPoints.push(p2);
-    blackBoardPoints.push(p3);
-    // var p1 = vec2(-1/7, -1);
-    // var p2 = vec2(0, -1);
-    // var p3 = vec2(-1/14, -1/8)
-    // blackBoardPoints.push(p1);
-    // blackBoardPoints.push(p2);
-    // blackBoardPoints.push(p3);
-    var p1 = vec2(1/7, -1);
-    var p2 = vec2(2/7, -1);
-    var p3 = vec2(3/14, -1/8)
-    blackBoardPoints.push(p1);
-    blackBoardPoints.push(p2);
-    blackBoardPoints.push(p3);
-    var p1 = vec2(3/7, -1);
-    var p2 = vec2(4/7, -1);
-    var p3 = vec2(7/14, -1/8)
-    blackBoardPoints.push(p1);
-    blackBoardPoints.push(p2);
-    blackBoardPoints.push(p3);
-    var p1 = vec2(5/7, -1);
-    var p2 = vec2(6/7, -1);
-    var p3 = vec2(11/14, -1/8)
-    blackBoardPoints.push(p1);
-    blackBoardPoints.push(p2);
-    blackBoardPoints.push(p3);
-    var p1 = vec2(-1, 1);
-    var p2 = vec2(-6/7, 1);
-    var p3 = vec2(-13/14, 1/8)
-    blackBoardPoints.push(p1);
-    blackBoardPoints.push(p2);
-    blackBoardPoints.push(p3);
-    var p1 = vec2(-5/7, 1);
-    var p2 = vec2(-4/7, 1);
-    var p3 = vec2(-9/14, 1/8)
-    blackBoardPoints.push(p1);
-    blackBoardPoints.push(p2);
-    blackBoardPoints.push(p3);
-    var p1 = vec2(-3/7, 1);
-    var p2 = vec2(-2/7, 1);
-    var p3 = vec2(-5/14, 1/8)
-    blackBoardPoints.push(p1);
-    blackBoardPoints.push(p2);
-    blackBoardPoints.push(p3);
-    var p1 = vec2(0, 1);
-    var p2 = vec2(1/7, 1);
-    var p3 = vec2(1/14, 1/8)
-    blackBoardPoints.push(p1);
-    blackBoardPoints.push(p2);
-    blackBoardPoints.push(p3);
-    var p1 = vec2(2/7, 1);
-    var p2 = vec2(3/7, 1);
-    var p3 = vec2(5/14, 1/8)
-    blackBoardPoints.push(p1);
-    blackBoardPoints.push(p2);
-    blackBoardPoints.push(p3);
-    var p1 = vec2(4/7, 1);
-    var p2 = vec2(5/7, 1);
-    var p3 = vec2(9/14, 1/8)
-    blackBoardPoints.push(p1);
-    blackBoardPoints.push(p2);
-    blackBoardPoints.push(p3);
-    // var p1 = vec2(6/7, 1);
-    // var p2 = vec2(1, 1);
-    // var p3 = vec2(13/14, 1/8)
-    // blackBoardPoints.push(p1);
-    // blackBoardPoints.push(p2);
-    // blackBoardPoints.push(p3);
-}
-
-// height of triangle = 3/8 board height
-// width of triangle = 1/14 board width
-function setRedTriangleCoords() {
-    var p1 = vec2(-1, -1);
-    var p2 = vec2(-6/7, -1);
-    var p3 = vec2(-13/14, -1/8)
-    redBoardPoints.push(p1);
-    redBoardPoints.push(p2);
-    redBoardPoints.push(p3);
-    var p1 = vec2(-5/7, -1);
-    var p2 = vec2(-4/7, -1);
-    var p3 = vec2(-9/14, -1/8)
-    redBoardPoints.push(p1);
-    redBoardPoints.push(p2);
-    redBoardPoints.push(p3);
-    var p1 = vec2(-3/7, -1);
-    var p2 = vec2(-2/7, -1);
-    var p3 = vec2(-5/14, -1/8)
-    redBoardPoints.push(p1);
-    redBoardPoints.push(p2);
-    redBoardPoints.push(p3);
-    var p1 = vec2(0, -1);
-    var p2 = vec2(1/7, -1);
-    var p3 = vec2(1/14, -1/8)
-    redBoardPoints.push(p1);
-    redBoardPoints.push(p2);
-    redBoardPoints.push(p3);
-    var p1 = vec2(2/7, -1);
-    var p2 = vec2(3/7, -1);
-    var p3 = vec2(5/14, -1/8)
-    redBoardPoints.push(p1);
-    redBoardPoints.push(p2);
-    redBoardPoints.push(p3);
-    var p1 = vec2(4/7, -1);
-    var p2 = vec2(5/7, -1);
-    var p3 = vec2(9/14, -1/8)
-    redBoardPoints.push(p1);
-    redBoardPoints.push(p2);
-    redBoardPoints.push(p3);
-    // var p1 = vec2(6/7, -1);
-    // var p2 = vec2(1, -1);
-    // var p3 = vec2(13/14, -1/8)
-    // redBoardPoints.push(p1);
-    // redBoardPoints.push(p2);
-    // redBoardPoints.push(p3);
-    var p1 = vec2(-6/7, 1);
-    var p2 = vec2(-5/7, 1);
-    var p3 = vec2(-11/14, 1/8)
-    redBoardPoints.push(p1);
-    redBoardPoints.push(p2);
-    redBoardPoints.push(p3);
-    var p1 = vec2(-4/7, 1);
-    var p2 = vec2(-3/7, 1);
-    var p3 = vec2(-7/14, 1/8)
-    redBoardPoints.push(p1);
-    redBoardPoints.push(p2);
-    redBoardPoints.push(p3);
-    var p1 = vec2(-2/7, 1);
-    var p2 = vec2(-1/7, 1);
-    var p3 = vec2(-3/14, 1/8)
-    redBoardPoints.push(p1);
-    redBoardPoints.push(p2);
-    redBoardPoints.push(p3);
-    // var p1 = vec2(-1/7, 1);
-    // var p2 = vec2(0, 1);
-    // var p3 = vec2(-1/14, 1/8)
-    // redBoardPoints.push(p1);
-    // redBoardPoints.push(p2);
-    // redBoardPoints.push(p3);
-    var p1 = vec2(6/7, 1);
-    var p2 = vec2(5/7, 1);
-    var p3 = vec2(11/14, 1/8)
-    redBoardPoints.push(p1);
-    redBoardPoints.push(p2);
-    redBoardPoints.push(p3);
-    var p1 = vec2(4/7, 1);
-    var p2 = vec2(3/7, 1);
-    var p3 = vec2(7/14, 1/8)
-    redBoardPoints.push(p1);
-    redBoardPoints.push(p2);
-    redBoardPoints.push(p3);
-    var p1 = vec2(2/7, 1);
-    var p2 = vec2(1/7, 1);
-    var p3 = vec2(3/14, 1/8)
-    redBoardPoints.push(p1);
-    redBoardPoints.push(p2);
-    redBoardPoints.push(p3);
-}
 
 function setRectangleBoardCoords() {
     var p1 = vec2(-1/7, 1);
@@ -356,22 +209,22 @@ function setRectangleBoardCoords() {
     rectangleBoardPoints.push(p1);
     rectangleBoardPoints.push(p2);
     rectangleBoardPoints.push(p3);
-    var p1 = vec2(-1/7, -1);
-    var p2 = vec2(0, 1);
-    var p3 = vec2(0, -1)
+    p1 = vec2(-1/7, -1);
+    p2 = vec2(0, 1);
+    p3 = vec2(0, -1)
     rectangleBoardPoints.push(p1);
     rectangleBoardPoints.push(p2);
     rectangleBoardPoints.push(p3);
 
-    var p1 = vec2(6/7, 1);
-    var p2 = vec2(6/7, -1);
-    var p3 = vec2(1, 1)
+    p1 = vec2(6/7, 1);
+    p2 = vec2(6/7, -1);
+    p3 = vec2(1, 1)
     rectangleBoardPoints.push(p1);
     rectangleBoardPoints.push(p2);
     rectangleBoardPoints.push(p3);
-    var p1 = vec2(6/7, -1);
-    var p2 = vec2(1, 1);
-    var p3 = vec2(1, -1)
+    p1 = vec2(6/7, -1);
+    p2 = vec2(1, 1);
+    p3 = vec2(1, -1)
     rectangleBoardPoints.push(p1);
     rectangleBoardPoints.push(p2);
     rectangleBoardPoints.push(p3);
