@@ -40,8 +40,6 @@ window.onload = function init()
 
     setTriangleCoords(1, "red", "black");
     setTriangleCoords(-1, "black", "red");
-    // setBlackTriangleCoords();
-    // setRedTriangleCoords();
     setRectangleBoardCoords();
 
     var blackBufferId = gl.createBuffer();
@@ -201,11 +199,10 @@ function setTriangleCoords(sign, color1, color2) {
     }
 }
 
-
 function setRectangleBoardCoords() {
     var p1 = vec2(-1/7, 1);
     var p2 = vec2(-1/7, -1);
-    var p3 = vec2(0, 1)
+    var p3 = vec2(0, 1);
     rectangleBoardPoints.push(p1);
     rectangleBoardPoints.push(p2);
     rectangleBoardPoints.push(p3);
@@ -218,7 +215,7 @@ function setRectangleBoardCoords() {
 
     p1 = vec2(6/7, 1);
     p2 = vec2(6/7, -1);
-    p3 = vec2(1, 1)
+    p3 = vec2(1, 1);
     rectangleBoardPoints.push(p1);
     rectangleBoardPoints.push(p2);
     rectangleBoardPoints.push(p3);
@@ -233,34 +230,34 @@ function setRectangleBoardCoords() {
 function create_and_gate(x, y){
     var p = vec2(-1.0*.1+x, -0.5*.1+y);
     points.push(p);
-    var p = vec2(-0.5*.1+x, -0.5*.1+y);
+    p = vec2(-0.5*.1+x, -0.5*.1+y);
     points.push(p);
     points.push(p);
-    var p = vec2(-0.5*.1+x, -1.0*.1+y);
+    p = vec2(-0.5*.1+x, -1.0*.1+y);
     points.push(p);
     points.push(p);
-    var p = vec2(-0.5*.1+x, 0.5*.1+y);
+    p = vec2(-0.5*.1+x, 0.5*.1+y);
     points.push(p);
     points.push(p);
-    var p = vec2(-1.0*.1+x, 0.5*.1+y);
+    p = vec2(-1.0*.1+x, 0.5*.1+y);
     points.push(p);
     points.push(p);
-    var p = vec2(-0.5*.1+x, 0.5*.1+y);
+    p = vec2(-0.5*.1+x, 0.5*.1+y);
     points.push(p);
     points.push(p);
-    var p = vec2(-0.5*.1+x, 1.0*.1+y);
+    p = vec2(-0.5*.1+x, 1.0*.1+y);
     points.push(p);
     points.push(p);
     for (var theta = Math.PI/2; theta <= Math.PI; theta += (Math.PI/20)){
-        var p = vec2((-0.5 - Math.cos(theta))*.1+x, Math.sin(theta)*.1+y);
+        p = vec2((-0.5 - Math.cos(theta))*.1+x, Math.sin(theta)*.1+y);
         points.push(p);
         points.push(p);
     }
-    var p = vec2(1.0*.1+x, 0.0*.1+y);
+    p = vec2(1.0*.1+x, 0.0*.1+y);
     points.push(p);
     points.push(p);
     for (var theta = Math.PI; theta <= 3*Math.PI/2; theta += (Math.PI/20)){
-        var p = vec2((-0.5 - Math.cos(theta))*.1+x, Math.sin(theta)*.1+y);
+        p = vec2((-0.5 - Math.cos(theta))*.1+x, Math.sin(theta)*.1+y);
         points.push(p);
         points.push(p);
 
@@ -273,42 +270,42 @@ function create_or_gate(x, y){
     var p = vec2(-1.0*.1+x, -0.5*.1+y);
     // points = [ p ];
     points.push(p);
-    var p = vec2(-0.5*.1+x, -0.5*.1+y);
+    p = vec2(-0.5*.1+x, -0.5*.1+y);
     points.push(p);
     points.push(p);
-    var p = vec2(-0.5*.1+x, -1.0*.1+y);
+    p = vec2(-0.5*.1+x, -1.0*.1+y);
     points.push(p);
     points.push(p);
-    var p = vec2(-0.5*.1+x, 0.5*.1+y);
+    p = vec2(-0.5*.1+x, 0.5*.1+y);
     points.push(p);
     points.push(p);
-    var p = vec2(-1.0*.1+x, 0.5*.1+y);
+    p = vec2(-1.0*.1+x, 0.5*.1+y);
     points.push(p);
     points.push(p);
-    var p = vec2(-0.5*.1+x, 0.5*.1+y);
+    p = vec2(-0.5*.1+x, 0.5*.1+y);
     points.push(p);
     points.push(p);
-    var p = vec2(-0.5*.1+x, 1.0*.1+y);
+    p = vec2(-0.5*.1+x, 1.0*.1+y);
     points.push(p);
     points.push(p);
     for (var theta = Math.PI/2; theta <= Math.PI; theta += (Math.PI/20)){
-        var p = vec2((-0.5 - Math.cos(theta))*.1+x, Math.sin(theta)*.1+y);
+        p = vec2((-0.5 - Math.cos(theta))*.1+x, Math.sin(theta)*.1+y);
         points.push(p);
         points.push(p);
     }
-    var p = vec2(1.0*.1+x, 0.0*.1+y);
+    p = vec2(1.0*.1+x, 0.0*.1+y);
     points.push(p);
     points.push(p);
     for (var theta = Math.PI; theta <= 3*Math.PI/2; theta += (Math.PI/20)){
-        var p = vec2((-0.5 - Math.cos(theta))*.1+x, Math.sin(theta)*.1+y);
+        p = vec2((-0.5 - Math.cos(theta))*.1+x, Math.sin(theta)*.1+y);
         points.push(p);
         points.push(p);
 
     }
-    var p = vec2(1.0*.1+x, 0.0*.1+y);
+    p = vec2(1.0*.1+x, 0.0*.1+y);
     points.push(p);
     points.push(p);
-    var p = vec2(-0.5*.1+x, 1.0*.1+y);
+    p = vec2(-0.5*.1+x, 1.0*.1+y);
     points.push(p);
     points.push(p);
     points.push(p);
