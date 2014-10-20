@@ -6,11 +6,11 @@ var points = [];
 var blackBoardPoints = [];
 var redBoardPoints = [];
 var rectangleBoardPoints = [];
-var redPieces = [];
-var blackPieces
+var gamePieces = [];
 
 var redTriangles = [];
 var blackTriangles = [];
+var triangles = [];
 
 var color;
 var colorLoc;
@@ -220,17 +220,18 @@ function setTriangleCoords(sign, color1, color2) {
 }
 
 function setCoords() {
-    var length = redTriangles.length;
+    var length = triangles.length;
     for (var i = 0; i < length; i++) {
-        redBoardPoints.push(redTriangles[i].vertexA);
-        redBoardPoints.push(redTriangles[i].vertexB);
-        redBoardPoints.push(redTriangles[i].vertexC);
-    }
-
-    for (var i = 0; i < length; i++) {
-        blackBoardPoints.push(blackTriangles[i].vertexA);
-        blackBoardPoints.push(blackTriangles[i].vertexB);
-        blackBoardPoints.push(blackTriangles[i].vertexC);
+        if (triangles[i].shade == 'red') {
+            redBoardPoints.push(triangles[i].vertexA);
+            redBoardPoints.push(triangles[i].vertexB);
+            redBoardPoints.push(triangles[i].vertexC);
+        }
+        else {
+            blackBoardPoints.push(triangles[i].vertexA);
+            blackBoardPoints.push(triangles[i].vertexB);
+            blackBoardPoints.push(triangles[i].vertexC);
+        }
     }
 }
 
@@ -256,10 +257,10 @@ function setTriangles(sign, color1, color2) {
         
         if (i%2===0) {
             triangle = new Triangle(p1, p2, p3, color1, leftBound, rightBound, topBound, bottomBound);
-            eval(color1+'Triangles').push(triangle);
+            triangles.push(triangle);
         } else {
             triangle = new Triangle(p1, p2, p3, color2, leftBound, rightBound, topBound, bottomBound);
-            eval(color2+'Triangles').push(triangle);
+            triangles.push(triangle);
         }
         
         leftBound = i/7;
@@ -271,10 +272,10 @@ function setTriangles(sign, color1, color2) {
         
         if (i%2===0) {
             triangle = new Triangle(p1, p2, p3, color1, leftBound, rightBound, topBound, bottomBound);
-            eval(color1+'Triangles').push(triangle);
+            triangles.push(triangle);
         } else {
             triangle = new Triangle(p1, p2, p3, color2, leftBound, rightBound, topBound, bottomBound);
-            eval(color2+'Triangles').push(triangle);
+            triangles.push(triangle);
         }
     }
 
@@ -289,10 +290,10 @@ function setTriangles(sign, color1, color2) {
         
         if (i%2===0) {
             triangle = new Triangle(p1, p2, p3, color1, leftBound, rightBound, topBound, bottomBound);
-            eval(color1+'Triangles').push(triangle);
+            triangles.push(triangle);
         } else {
             triangle = new Triangle(p1, p2, p3, color2, leftBound, rightBound, topBound, bottomBound);
-            eval(color2+'Triangles').push(triangle);
+            triangles.push(triangle);
         }
 
         leftBound = i/7;
@@ -304,10 +305,10 @@ function setTriangles(sign, color1, color2) {
 
         if (i%2===0) {
             triangle = new Triangle(p1, p2, p3, color1, leftBound, rightBound, topBound, bottomBound);
-            eval(color1+'Triangles').push(triangle);
+            triangles.push(triangle);
         } else {
             triangle = new Triangle(p1, p2, p3, color2, leftBound, rightBound, topBound, bottomBound);
-            eval(color2+'Triangles').push(triangle);
+            triangles.push(triangle);
         }
     }
 }
@@ -340,7 +341,7 @@ function setRectangleBoardCoords() {
     rectangleBoardPoints.push(p3);
 }
 
-function Triangle(a, b, c, color, element, leftBound, rightBound, topBound, bottomBound) {
+function Triangle(a, b, c, color, element, leftBound, rightBound, topBound, bottomBound, position) {
     this.vertexA = a;
     this.vertexB = b;
     this.vertexC = c;
@@ -348,6 +349,8 @@ function Triangle(a, b, c, color, element, leftBound, rightBound, topBound, bott
     this.rightBound = rightBound;
     this.topBound = topBound;
     this.bottomBound = bottomBound;
+    this.posiiton = position;
+    this.pieceNumber = 0;
 
     this.shade = color;
     // this.onClick1 = function(event) {
@@ -378,24 +381,44 @@ function Triangle(a, b, c, color, element, leftBound, rightBound, topBound, bott
 
 function sayClicked(event) {
     console.log("Click event");
+}
 
-function GamePiece(color, row, column) {
-    this.color = color;
-    this.row = row;
-    this.column = column;
+function GamePiece(color, position) {
+    this.shade = color;
+    this.position = position;
 }
 
 GamePiece.prototype.draw = function(){
 
 };
 
-GamePiece.prototype.setLocation = function(row, column){
-    this.row = row;
-    this.column = column;
+GamePiece.prototype.setLocation = function(position){
+    this.position = position
 };
 
 function createGamePieceArray(){
     for (var i = 0; i < 2; i++){
+        this.gamePieces.push(new GamePiece(red, 0));
+        this.triangles[0].pieceNumber +=1;
+        this.gamePieces.push(new GamePiece(black, 23));
+        this.triangles[23].pieceNumber +=1;
+    }
 
+    for (i = 0; i < 3; i++){
+        thi.gamePieces.push(new GamePiece(red, 16));
+        this.triangles[16].pieceNumber +=1;
+        this.gamePieces.push(new GamePiece(black, 7));
+        this.triangles[7].pieceNumber +=1;
+    }
+
+    for (i = 0; i < 5; i++){
+        this.gamePieces.push(new GamePiece(red, 11));
+        this.triangles[11].pieceNumber +=1;
+        this.gamePieces.push(new GamePiece(red, 18));
+        this.triangles[18].pieceNumber +=1;
+        this.gamePieces.push(new GamePiece(black, 5));
+        this.triangles[5].pieceNumber +=1;
+        this.gamePieces.push(new GamePiece(black, 12));
+        this.triangles[12].pieceNumber +=1;
     }
 }
