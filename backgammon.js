@@ -83,14 +83,9 @@ window.onload = function init() {
     canvas.addEventListener ("click", function(event) {
         var x = -1 + 2*(event.clientX)/canvas.width;
         var y = -1 + 2*(canvas.height-event.clientY)/canvas.height;
-        for (var i = 0; i < redTriangles.length; i++) {
-            if (redTriangles[i].hitTest(x,y)) {
-                alert("Clicked a red triangle");
-            }
-        }
-        for (var i = 0; i < blackTriangles.length; i++) {
-            if (blackTriangles[i].hitTest(x,y)) {
-                alert("Clicked a black triangle");
+        for (var i = 0; i < triangles.length; i++) {
+            if (triangles[i].hitTest(x,y)) {
+                alert("Clicked a " + triangles[i].shade + " triangle");
             }
         }
     });
