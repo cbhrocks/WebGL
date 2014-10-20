@@ -83,15 +83,14 @@ window.onload = function init() {
     canvas.addEventListener ("click", function(event) {
         var x = -1 + 2*(event.clientX)/canvas.width;
         var y = -1 + 2*(canvas.height-event.clientY)/canvas.height;
-        //console.log(y);
         for (var i = 0; i < redTriangles.length; i++) {
             if (redTriangles[i].hitTest(x,y)) {
-                console.log("Clicked a red triangle");
+                alert("Clicked a red triangle");
             }
         }
         for (var i = 0; i < blackTriangles.length; i++) {
             if (blackTriangles[i].hitTest(x,y)) {
-                console.log("Clicked a black triangle");
+                alert("Clicked a black triangle");
             }
         }
     });
@@ -281,8 +280,8 @@ function setTriangles(sign, color1, color2) {
 
     for (i = 0; i < 7; i++) {
         
-        leftBound = -(7-1-i)/7;
-        rightBound = -(7-i)/7;
+        leftBound = -(7-i)/7;
+        rightBound = -(7-1-i)/7;
         
         p1 = vec2(-(7-i)/7, sign * -1);
         p2 = vec2(-(7-1-i)/7, sign * -1);
@@ -341,7 +340,7 @@ function setRectangleBoardCoords() {
     rectangleBoardPoints.push(p3);
 }
 
-function Triangle(a, b, c, color, element, leftBound, rightBound, topBound, bottomBound, position) {
+function Triangle(a, b, c, color, leftBound, rightBound, topBound, bottomBound, position) {
     this.vertexA = a;
     this.vertexB = b;
     this.vertexC = c;
@@ -367,7 +366,7 @@ function Triangle(a, b, c, color, element, leftBound, rightBound, topBound, bott
         var inWidthBox = false;
         var inLengthBox = false;
 
-        if (x < this.leftBound && x > this.rightBound) {
+        if (x > this.leftBound && x < this.rightBound) {
             inWidthBox = true;
         }
 
@@ -375,7 +374,7 @@ function Triangle(a, b, c, color, element, leftBound, rightBound, topBound, bott
             inLengthBox = true;
         }
         
-        return inWidthBox //&& inLengthBox;
+        return (inWidthBox && inLengthBox);
     };
 }
 
