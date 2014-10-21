@@ -11,15 +11,22 @@ var gamePiecePoints = [];
 
 var triangles = [];
 
+var player1 = new Player("Player 1", "red");
+var player2 = new Player("Player 2", "black");
+
+var players = [player1, player2];
+
+var currentPlayer;
+var currentPlayerIndex;
+
+var playGame; //= true;
+
 var color;
 var colorLoc;
-var isNot;
-var isAnd;
-var isOr;
 
 window.onload = function init() {
     var canvas = document.getElementById( "gl-canvas" );
-    
+
     gl = WebGLUtils.setupWebGL( canvas );
     if ( !gl ) { alert( "WebGL isn't available" ); }
 
@@ -28,12 +35,12 @@ window.onload = function init() {
     //
     gl.viewport( 0, 0, canvas.width, canvas.height );
     gl.clearColor( 1.0, 0.8, 0.7, 1.0 );
-    
+
     //  Load shaders and initialize attribute buffers
-    
+
     var program = initShaders( gl, "vertex-shader", "fragment-shader" );
     gl.useProgram( program );
-    
+
     // Load the data into the GPU
     color = vec4 (0.0, 0.0, 0.0, 1.0);
     colorLoc = gl.getUniformLocation (program, "color");
@@ -60,7 +67,7 @@ window.onload = function init() {
     color = vec4 (1.0, 0.0, 0.0, 1.0);
 
     // Associate out shader variables with our data buffer
-    
+
     vPosition = gl.getAttribLocation( program, "vPosition" );
     gl.vertexAttribPointer( vPosition, 2, gl.FLOAT, false, 0, 0 );
     gl.enableVertexAttribArray( vPosition );
@@ -94,23 +101,101 @@ window.onload = function init() {
         var y = -1 + 2*(canvas.height-event.clientY)/canvas.height;
         for (var i = 0; i < triangles.length; i++) {
             if (triangles[i].hitTest(x,y)) {
-                alert("Clicked a " + triangles[i].shade + " triangle whos number is " + triangles[i].position);
+                alert("Clicked a " + triangles[i].shade + " triangle whose number is " + triangles[i].position);
             }
         }
     });
+
+    document.getElementById("RollDice").onclick = function() {
+        if(!currentPlayer.hasRolled()) {
+            currentPlayer.rollDice();
+            alert("Rolled a " + currentPlayer.dice[0] + " and a " + currentPlayer.dice[1]);
+        } else {
+            alert("You can't roll again!\nYou already rolled a " + currentPlayer.dice[0] + " and a " + currentPlayer.dice[1]);
+        }
+    }
+
+    document.getElementById("EndTurn").onclick = function() {
+        if (currentPlayer.hasRolled()) {
+            if (currentPlayerIndex === 1) {
+                currentPlayerIndex = 0;
+            } else {
+                currentPlayerIndex = 1;
+            }
+            currentPlayer.dice = [];
+            currentPlayer = players[currentPlayerIndex];
+        } else {
+            alert("You haven't rolled yet!")
+        }
+        alert(currentPlayer.nickname + "'s turn");
+    }
+
+    currentPlayerIndex = determineFirstMove();
+    console.log(playGame);
+    //playGame = true;
+
+    // while (playGame) {
+    //      currentPlayer = players[currentPlayerIndex];
+    //      playGame = false;
+    // }
 };
 
+// Each player rolls a die to determine who goes first
+function determineFirstMove() {
+    var player1Roll = Math.random(1,6);
+    var player2Roll = Math.random(1,6);
+
+    if (player1Roll > player2Roll) {
+        currentPlayer = players[0];
+        playGame = confirm("Player 1 Goes First");
+        if (playGame) {
+            // do nothing
+        } else {
+            playGame = true;
+        }
+        return 0;
+    } else if (player2Roll > player1Roll) {
+        currentPlayer = players[1];
+        playGame = confirm("Player 2 Goes First");
+        if (playGame) {
+            // do nothing
+        } else {
+            playGame = true;
+        }
+        return 1;
+    } else {
+        determineFirst();
+    }
+}
+
+function Player(nickname, color) {
+    this.nickname = nickname;
+    this.shade = color;
+    this.dice = [];
+
+    this.rollDice = function() {
+        this.dice = [ Math.floor(Math.random() * (6)) + 1, Math.floor(Math.random() * (6)) + 1 ];
+    };
+
+    this.hasRolled = function() {
+        return this.dice.length != 0;
+    }
+}
+
+// Draws the black triangles on the board
 function renderBlackBoard() {
     gl.clear( gl.COLOR_BUFFER_BIT );
     gl.uniform4fv (colorLoc, color);
     gl.drawArrays( gl.TRIANGLES, 0, blackBoardPoints.length )
 }
 
+// Draws the red triangles on the board
 function renderRedBoard() {
     gl.uniform4fv (colorLoc, color);
     gl.drawArrays( gl.TRIANGLES, 0, redBoardPoints.length )
 }
 
+// Draws the two vertical bars on the board
 function renderRectangleBoard() {
     gl.uniform4fv (colorLoc, color);
     gl.drawArrays( gl.TRIANGLES, 0, rectangleBoardPoints.length )
@@ -123,65 +208,7 @@ function renderPieces(){
     gl_PointSize = 25;
 }
 
-
-// height of triangle = 7/16 board height
-// width of triangle = 1/14 board width
-function setTriangleCoords(sign, color1, color2) {
-    for (var i = 0; i < 7; i++) {
-        var p1 = vec2((7-i)/7, sign * -1);
-        var p2 = vec2((7-1-i)/7, sign * -1);
-        var p3 = vec2((13-2*i)/14, sign * -1/8);
-        if (i%2===0) {
-            eval(color1+'BoardPoints').push(p1);
-            eval(color1+'BoardPoints').push(p2);
-            eval(color1+'BoardPoints').push(p3);
-        } else {
-            eval(color2+'BoardPoints').push(p1);
-            eval(color2+'BoardPoints').push(p2);
-            eval(color2+'BoardPoints').push(p3);
-        }
-        p1 = vec2(i/7, sign * -1);
-        p2 = vec2((i+1)/7, sign * -1);
-        p3 = vec2((2*i+1)/14, sign * -1/8);
-        if (i%2===0) {
-            eval(color1+'BoardPoints').push(p1);
-            eval(color1+'BoardPoints').push(p2);
-            eval(color1+'BoardPoints').push(p3);
-        } else {
-            eval(color2+'BoardPoints').push(p1);
-            eval(color2+'BoardPoints').push(p2);
-            eval(color2+'BoardPoints').push(p3);
-        }
-    }
-
-    for (i = 0; i < 7; i++) {
-        p1 = vec2(-(7-i)/7, sign * -1);
-        p2 = vec2(-(7-1-i)/7, sign * -1);
-        p3 = vec2(-(13-2*i)/14, sign * -1/8);
-        if (i%2===0) {
-            eval(color1+'BoardPoints').push(p1);
-            eval(color1+'BoardPoints').push(p2);
-            eval(color1+'BoardPoints').push(p3);
-        } else {
-            eval(color2+'BoardPoints').push(p1);
-            eval(color2+'BoardPoints').push(p2);
-            eval(color2+'BoardPoints').push(p3);
-        }
-        p1 = vec2(i/7, sign * -1);
-        p2 = vec2((i+1)/7, sign * -1);
-        p3 = vec2((2*i+1)/14, sign * -1/8);
-        if (i%2===0) {
-            eval(color1+'BoardPoints').push(p1);
-            eval(color1+'BoardPoints').push(p2);
-            eval(color1+'BoardPoints').push(p3);
-        } else {
-            eval(color2+'BoardPoints').push(p1);
-            eval(color2+'BoardPoints').push(p2);
-            eval(color2+'BoardPoints').push(p3);
-        }
-    }
-}
-
+// Pushes the vertices of each triangle to an array of points based on the triangle's color
 function setCoords() {
     var length = triangles.length;
     for (var i = 0; i < length; i++) {
@@ -198,6 +225,7 @@ function setCoords() {
     }
 }
 
+// Draws alternating black and red triangles in each quadrant
 function setTriangles(color1, color2){
     for (var i = 0; i < 6; i++){
         if (i%2===0)
@@ -268,7 +296,7 @@ function setTriangles(color1, color2){
     }
 }
 
-
+// Sets up the vertical bars in the middle of the board and at the right edge of the board
 function setRectangleBoardCoords() {
     var p1 = vec2(-1/7, 1);
     var p2 = vec2(-1/7, -1);
@@ -330,7 +358,7 @@ function Triangle(a, b, c, color, leftBound, rightBound, topBound, bottomBound, 
         if (y > this.bottomBound && y < this.topBound) {
             inLengthBox = true;
         }
-        
+
         return (inWidthBox && inLengthBox);
     };
 }
