@@ -7,9 +7,8 @@ var blackBoardPoints = [];
 var redBoardPoints = [];
 var rectangleBoardPoints = [];
 var gamePieces = [];
+var gamePiecePoints = [];
 
-var redTriangles = [];
-var blackTriangles = [];
 var triangles = [];
 
 var color;
@@ -79,6 +78,17 @@ window.onload = function init() {
 
     renderRectangleBoard();
 
+    var gamePieceBufferId = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, gamePieceBufferId);
+    gl.bufferData( gl.ARRAY_BUFFER, flatten(gamePiecePoints), gl.STATIC_DRAW);
+    color = vec4 (0.0, 0.0, 1.0, 1.0);
+
+    vPosition = gl.getAttribLocation(program, "vPosition" );
+    gl.vertexAttribPointer(vPosition, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray( vPosition);
+
+    renderPieces();
+
     canvas.addEventListener ("click", function(event) {
         var x = -1 + 2*(event.clientX)/canvas.width;
         var y = -1 + 2*(canvas.height-event.clientY)/canvas.height;
@@ -88,46 +98,6 @@ window.onload = function init() {
             }
         }
     });
-
-    // canvas.addEventListener ("click", function(event) {
-    //     var x = -1 + 2*(event.clientX-80)/canvas.width;
-    //     var y = -1 + 2*(canvas.height-event.clientY + 8)/canvas.height;
-    //     // var points = create_and_or_gate(x, y);
-    //     if (isNot){
-    //         create_not_gate(x,y);
-    //     }
-    //     else if (isAnd){
-    //         create_and_gate(x,y);
-    //     }
-    //     else if (isOr){
-    //         create_or_gate(x,y);
-    //     }
-    //     gl.bufferSubData (gl.ARRAY_BUFFER, points, flatten(points));
-    //     // render();
-    // });
-
-    // var menu = document.getElementById ("gateMenu");
-    // menu.addEventListener ("click", function () {
-    //     switch (menu.selectedIndex) {
-    //         case 0:
-    //             isAnd = true;
-    //             isOr = false
-    //             isNot = false;
-    //             // render();
-    //             break;
-    //         case 1:
-    //             isAnd = false;
-    //             isOr = true;
-    //             isNot = false;
-    //             // render();
-    //             break;
-    //         case 2:
-    //             isAnd = false;
-    //             isOr = false;
-    //             isNot = true;
-    //     }
-    // })
-    //render();
 };
 
 function renderBlackBoard() {
@@ -146,11 +116,11 @@ function renderRectangleBoard() {
     gl.drawArrays( gl.TRIANGLES, 0, rectangleBoardPoints.length )
 }
 
-function render() {
-    //gl.clear( gl.COLOR_BUFFER_BIT );
+function renderPieces(){
     gl.uniform4fv (colorLoc, color);
-    gl.drawArrays( gl.LINES, 0, points.length );
-    requestAnimFrame (render);
+    gl.drawArrays(gl.POINTS, 0, gamePiecePoints.length)
+    glEnable(GL_PROGRAM_POINT_SIZE);
+    gl_PointSize = 25;
 }
 
 
@@ -373,14 +343,39 @@ function GamePiece(color, position) {
     this.shade = color;
     this.position = position;
     this.points = [];
+    this.xCord = 0;
+    this.yCord = 0;
 }
 
-GamePiece.prototype.addPoints = function(){
-
+GamePiece.prototype.setCenter = function(){
+    if (this.position < 6){
+        this.xCord = ((5/7 - this.position/7) + (6/7 - this.position/7))/2;
+        this.yCord = triangles[this.position].pieceNumber*1/15*-1
+    }
+    else if (this.position < 12 && this.position > 5){
+        this.xCord = ((-2/7 - (this.position-6)/7) + (-1/7 - (this.position-6)/7))/2;
+        this.yCord = triangles[this.position].pieceNumber*1/15*-1
+    }
+    else if (this.position < 18 && this.posiiton > 11){
+        this.xCord = ((-1 + (this.position-12)/7) + (-1 + (this.position-11)/7))/2;
+        this.yCord = triangles[this.position].pieceNumber*1/15
+    }
+    else if (this.position < 24 && this.posiiton > 17){
+        this.xCord = ((this.position-18)/7 + (this.position-17)/7)/2;
+        this.yCord = triangles[this.position].pieceNumber*1/15
+    }
 };
 
 GamePiece.prototype.setLocation = function(position){
-    this.position = position
+    this.position = position;
+};
+
+GamePiece.prototype.fillPointsArray = function(){
+    for (var theta = 0; theta < Math.PI*2; theta += Math.PI/20){
+        var p = vec2(-1/14 - Math.cos(theta), Math.sin(theta));
+        gamePiecePoints.push(p);
+//        gamePiecePoints.push(new vec2(gamePieces[i].xCord, gamePieces[i].yCord))
+    }
 };
 
 function fillGamePieceArray(){
@@ -409,3 +404,4 @@ function fillGamePieceArray(){
         this.triangles[12].pieceNumber +=1;
     }
 }
+
