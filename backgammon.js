@@ -249,13 +249,13 @@ function setTriangles(sign, color1, color2) {
         var p3 = vec2((13-2*i)/14, sign * -1/8);
         var triangle;
         
-        if (i%2===0) {
-            triangle = new Triangle(p1, p2, p3, color1, leftBound, rightBound, topBound, bottomBound);
-            triangles.push(triangle);
-        } else {
-            triangle = new Triangle(p1, p2, p3, color2, leftBound, rightBound, topBound, bottomBound);
-            triangles.push(triangle);
-        }
+        // if (i%2===0) {
+        //     triangle = new Triangle(p1, p2, p3, color1, leftBound, rightBound, topBound, bottomBound);
+        //     triangles.push(triangle);
+        // } else {
+        //     triangle = new Triangle(p1, p2, p3, color2, leftBound, rightBound, topBound, bottomBound);
+        //     triangles.push(triangle);
+        // }
         
         leftBound = i/7;
         rightBound = (i+1)/7;
@@ -290,20 +290,20 @@ function setTriangles(sign, color1, color2) {
             triangles.push(triangle);
         }
 
-        leftBound = i/7;
-        rightBound = (i+1)/7;
+        // leftBound = i/7;
+        // rightBound = (i+1)/7;
 
-        p1 = vec2(i/7, sign * -1);
-        p2 = vec2((i+1)/7, sign * -1);
-        p3 = vec2((2*i+1)/14, sign * -1/8);
+        // p1 = vec2(i/7, sign * -1);
+        // p2 = vec2((i+1)/7, sign * -1);
+        // p3 = vec2((2*i+1)/14, sign * -1/8);
 
-        if (i%2===0) {
-            triangle = new Triangle(p1, p2, p3, color1, leftBound, rightBound, topBound, bottomBound);
-            triangles.push(triangle);
-        } else {
-            triangle = new Triangle(p1, p2, p3, color2, leftBound, rightBound, topBound, bottomBound);
-            triangles.push(triangle);
-        }
+        // if (i%2===0) {
+        //     triangle = new Triangle(p1, p2, p3, color1, leftBound, rightBound, topBound, bottomBound);
+        //     triangles.push(triangle);
+        // } else {
+        //     triangle = new Triangle(p1, p2, p3, color2, leftBound, rightBound, topBound, bottomBound);
+        //     triangles.push(triangle);
+        // }
     }
 }
 
