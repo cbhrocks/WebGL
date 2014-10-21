@@ -209,7 +209,9 @@ function Player(nickname, color) {
 
     this.hasRolled = function() {
         return this.dice.length != 0;
-    }
+    };
+
+    this.getGamePieces
 }
 
 // Draws the black triangles on the board
