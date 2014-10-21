@@ -18,6 +18,7 @@ var players = [player1, player2];
 var currentPlayer;
 var currentPlayerIndex;
 
+var firstClick = true;
 var playGame; //= true;
 
 var color;
@@ -90,9 +91,24 @@ window.onload = function init() {
     canvas.addEventListener ("click", function(event) {
         var x = -1 + 2*(event.clientX)/canvas.width;
         var y = -1 + 2*(canvas.height-event.clientY)/canvas.height;
+        var indexOfTriangleToMovePieceFrom;
+        var indexOfTriangleToMovePieceTo;
         for (var i = 0; i < triangles.length; i++) {
             if (triangles[i].hitTest(x,y)) {
-                alert("Clicked a " + triangles[i].shade + " triangle whose number is " + triangles[i].position);
+                if(firstClick) {
+                    firstClick = false;
+                    indexOfTriangleToMovePieceFrom = i;
+                    alert("Clicked a " + triangles[i].shade + " triangle whose number is " + triangles[i].position);
+                } else {
+                    firstClick = true;
+                    indexOfTriangleToMovePieceTo = i;
+                    alert("Clicked a " + triangles[i].shade + " triangle whose number is " + triangles[i].position);
+                    triangles[indexOfTriangleToMovePieceFrom].pieceNumber -= 1;
+                    triangles[indexOfTriangleToMovePieceTo].pieceNumber += 1;
+                    // TODO: need to access gamePiece and setLocation to ith triangle
+                    gamePieces[getIndexOfHighestGamePieceOnATriangle].setLocation(indexOfTriangleToMovePieceTo);
+                    renderPieces(program);
+                }
             }
         }
     });
@@ -171,8 +187,6 @@ function Player(nickname, color) {
     this.hasRolled = function() {
         return this.dice.length != 0;
     };
-
-    this.getGamePieces
 }
 
 // Draws the black triangles on the board
@@ -326,6 +340,27 @@ function setRectangleBoardCoords() {
     rectangleBoardPoints.push(p1);
     rectangleBoardPoints.push(p2);
     rectangleBoardPoints.push(p3);
+}
+
+function getIndexOfHighestGamePieceOnATriangle(trianglePosition) {
+    var highestGamePieceIndex = null;
+
+    for (var i = 0; i < gamePieces.length; i++) {
+        if (gamePieces[i].position === trianglePosition) {
+            if (highestGamePieceIndex == null) {
+                highestGamePieceIndex = i;
+            } else if (trianglePosition >= 12) {
+                if (gamePieces[highestGamePieceIndex].yCord > gamePieces[i].yCord) {
+                    highestGamePieceIndex = i;
+                }
+            } else {
+                if (gamePieces[highestGamePieceIndex].yCord < gamePieces[i].yCord) {
+                    highestGamePieceIndex = i;
+                }
+            }
+        }
+    }
+    return highestGamePieceIndex;
 }
 
 function Triangle(a, b, c, color, leftBound, rightBound, topBound, bottomBound, position) {
