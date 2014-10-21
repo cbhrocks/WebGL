@@ -214,7 +214,13 @@ function renderPieces(program){
         var gamePieceBufferId = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, gamePieceBufferId);
         gl.bufferData(gl.ARRAY_BUFFER, flatten(gamePieces[i].points), gl.STATIC_DRAW);
-        color = vec4(0.0, 0.0, 1.0, 1.0);
+
+        if (gamePieces[i].shade === "red") {
+            color = vec4(0.5, 0.1, 0.1, gamePieces[i].lightness);
+        }
+        else{
+            color = vec4(0.1, 0.1, 0.1, gamePieces[i].lightness);
+        }
 
         vPosition = gl.getAttribLocation(program, "vPosition");
         gl.vertexAttribPointer(vPosition, 2, gl.FLOAT, false, 0, 0);
@@ -409,26 +415,30 @@ function GamePiece(color, position) {
     this.shade = color;
     this.position = position;
     this.points = [];
-    this.xCord = 0;
-    this.yCord = 0;
+    this.lightness = 1;
+    this.setCenter();
 }
 
 GamePiece.prototype.setCenter = function(){
     if (this.position < 6){
         this.xCord = ((5/7 - this.position/7) + (6/7 - this.position/7))/2;
-        this.yCord = triangles[this.position].pieceNumber*1/15*-1
+        this.yCord = -1 + (1/14) + triangles[this.position].pieceNumber*(1/15);
+        this.lightness -= triangles[this.position].pieceNumber*(1/15);
     }
     else if (this.position < 12 && this.position > 5){
         this.xCord = ((-2/7 - (this.position-6)/7) + (-1/7 - (this.position-6)/7))/2;
-        this.yCord = triangles[this.position].pieceNumber*1/15*-1
+        this.yCord = -1 + (1/14) + triangles[this.position].pieceNumber*(1/15);
+        this.lightness -= triangles[this.position].pieceNumber*(1/15);
     }
-    else if (this.position < 18 && this.posiiton > 11){
+    else if (this.position < 18 && this.position > 11){
         this.xCord = ((-1 + (this.position-12)/7) + (-1 + (this.position-11)/7))/2;
-        this.yCord = triangles[this.position].pieceNumber*1/15
+        this.yCord = 1 - (1/14) - triangles[this.position].pieceNumber*(1/15);
+        this.lightness -= triangles[this.position].pieceNumber*(1/15);
     }
-    else if (this.position < 24 && this.posiiton > 17){
+    else if (this.position < 24 && this.position > 17){
         this.xCord = ((this.position-18)/7 + (this.position-17)/7)/2;
-        this.yCord = triangles[this.position].pieceNumber*1/15
+        this.yCord = 1 - (1/14) - triangles[this.position].pieceNumber*(1/15);
+        this.lightness -= triangles[this.position].pieceNumber*(1/15);
     }
 };
 
@@ -437,9 +447,8 @@ GamePiece.prototype.setLocation = function(position){
 };
 
 GamePiece.prototype.fillPointsArray = function(){
-    this.setCenter();
     for (var theta = 0; theta < Math.PI*2; theta += Math.PI/20){
-        var p = vec2((-(1/14) - Math.cos(theta))*.1+this.xCord, Math.sin(theta)*.1+this.yCord);
+        var p = vec2((Math.cos(theta))*(1/14)+this.xCord, Math.sin(theta)*(1/14)+this.yCord);
         this.points.push(p);
     }
 };
