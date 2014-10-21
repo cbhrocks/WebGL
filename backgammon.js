@@ -7,7 +7,6 @@ var blackBoardPoints = [];
 var redBoardPoints = [];
 var rectangleBoardPoints = [];
 var gamePieces = [];
-var gamePiecePoints = [];
 
 var triangles = [];
 
@@ -85,16 +84,8 @@ window.onload = function init() {
 
     renderRectangleBoard();
 
-    var gamePieceBufferId = gl.createBuffer();
-    gl.bindBuffer( gl.ARRAY_BUFFER, gamePieceBufferId);
-    gl.bufferData( gl.ARRAY_BUFFER, flatten(gamePiecePoints), gl.STATIC_DRAW);
-    color = vec4 (0.0, 0.0, 1.0, 1.0);
-
-    vPosition = gl.getAttribLocation(program, "vPosition" );
-    gl.vertexAttribPointer(vPosition, 2, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray( vPosition);
-
-    renderPieces();
+    fillGamePieceArray();
+    renderPieces(program);
 
     canvas.addEventListener ("click", function(event) {
         var x = -1 + 2*(event.clientX)/canvas.width;
@@ -201,11 +192,21 @@ function renderRectangleBoard() {
     gl.drawArrays( gl.TRIANGLES, 0, rectangleBoardPoints.length )
 }
 
-function renderPieces(){
-    gl.uniform4fv (colorLoc, color);
-    gl.drawArrays(gl.POINTS, 0, gamePiecePoints.length)
-    glEnable(GL_PROGRAM_POINT_SIZE);
-    gl_PointSize = 25;
+function renderPieces(program){
+    for (var i = 0; i < gamePieces.length; i++) {
+        gamePieces[i].fillPointsArray();
+        var gamePieceBufferId = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, gamePieceBufferId);
+        gl.bufferData(gl.ARRAY_BUFFER, flatten(gamePieces[i].points), gl.STATIC_DRAW);
+        color = vec4(0.0, 0.0, 1.0, 1.0);
+
+        vPosition = gl.getAttribLocation(program, "vPosition");
+        gl.vertexAttribPointer(vPosition, 2, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(vPosition);
+
+        gl.uniform4fv(colorLoc, color);
+        gl.drawArrays(gl.TRIANGLE_FAN, 0, gamePieces[i].points.length);
+    }
 }
 
 // Pushes the vertices of each triangle to an array of points based on the triangle's color
@@ -399,36 +400,36 @@ GamePiece.prototype.setLocation = function(position){
 };
 
 GamePiece.prototype.fillPointsArray = function(){
+    this.setCenter();
     for (var theta = 0; theta < Math.PI*2; theta += Math.PI/20){
-        var p = vec2(-1/14 - Math.cos(theta), Math.sin(theta));
-        gamePiecePoints.push(p);
-//        gamePiecePoints.push(new vec2(gamePieces[i].xCord, gamePieces[i].yCord))
+        var p = vec2((-(1/14) - Math.cos(theta))*.1+this.xCord, Math.sin(theta)*.1+this.yCord);
+        this.points.push(p);
     }
 };
 
 function fillGamePieceArray(){
     for (var i = 0; i < 2; i++){
-        this.gamePieces.push(new GamePiece(red, 0));
+        this.gamePieces.push(new GamePiece("red", 0));
         this.triangles[0].pieceNumber +=1;
-        this.gamePieces.push(new GamePiece(black, 23));
+        this.gamePieces.push(new GamePiece("black", 23));
         this.triangles[23].pieceNumber +=1;
     }
 
     for (i = 0; i < 3; i++){
-        this.gamePieces.push(new GamePiece(red, 16));
+        this.gamePieces.push(new GamePiece("red", 16));
         this.triangles[16].pieceNumber +=1;
-        this.gamePieces.push(new GamePiece(black, 7));
+        this.gamePieces.push(new GamePiece("black", 7));
         this.triangles[7].pieceNumber +=1;
     }
 
     for (i = 0; i < 5; i++){
-        this.gamePieces.push(new GamePiece(red, 11));
+        this.gamePieces.push(new GamePiece("red", 11));
         this.triangles[11].pieceNumber +=1;
-        this.gamePieces.push(new GamePiece(red, 18));
+        this.gamePieces.push(new GamePiece("red", 18));
         this.triangles[18].pieceNumber +=1;
-        this.gamePieces.push(new GamePiece(black, 5));
+        this.gamePieces.push(new GamePiece("black", 5));
         this.triangles[5].pieceNumber +=1;
-        this.gamePieces.push(new GamePiece(black, 12));
+        this.gamePieces.push(new GamePiece("black", 12));
         this.triangles[12].pieceNumber +=1;
     }
 }
