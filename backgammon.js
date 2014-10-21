@@ -8,8 +8,6 @@ var redBoardPoints = [];
 var rectangleBoardPoints = [];
 var gamePieces = [];
 
-var redTriangles = [];
-var blackTriangles = [];
 var triangles = [];
 
 var player1 = new Player("Player 1", "red");
@@ -27,7 +25,7 @@ var colorLoc;
 
 window.onload = function init() {
     var canvas = document.getElementById( "gl-canvas" );
-    
+
     gl = WebGLUtils.setupWebGL( canvas );
     if ( !gl ) { alert( "WebGL isn't available" ); }
 
@@ -36,12 +34,12 @@ window.onload = function init() {
     //
     gl.viewport( 0, 0, canvas.width, canvas.height );
     gl.clearColor( 1.0, 0.8, 0.7, 1.0 );
-    
+
     //  Load shaders and initialize attribute buffers
-    
+
     var program = initShaders( gl, "vertex-shader", "fragment-shader" );
     gl.useProgram( program );
-    
+
     // Load the data into the GPU
     color = vec4 (0.0, 0.0, 0.0, 1.0);
     colorLoc = gl.getUniformLocation (program, "color");
@@ -68,7 +66,7 @@ window.onload = function init() {
     color = vec4 (1.0, 0.0, 0.0, 1.0);
 
     // Associate out shader variables with our data buffer
-    
+
     vPosition = gl.getAttribLocation( program, "vPosition" );
     gl.vertexAttribPointer( vPosition, 2, gl.FLOAT, false, 0, 0 );
     gl.enableVertexAttribArray( vPosition );
@@ -85,6 +83,9 @@ window.onload = function init() {
     gl.enableVertexAttribArray( vPosition );
 
     renderRectangleBoard();
+
+    fillGamePieceArray();
+    renderPieces(program);
 
     canvas.addEventListener ("click", function(event) {
         var x = -1 + 2*(event.clientX)/canvas.width;
@@ -128,46 +129,6 @@ window.onload = function init() {
     //      currentPlayer = players[currentPlayerIndex];
     //      playGame = false;
     // }
-
-    // canvas.addEventListener ("click", function(event) {
-    //     var x = -1 + 2*(event.clientX-80)/canvas.width;
-    //     var y = -1 + 2*(canvas.height-event.clientY + 8)/canvas.height;
-    //     // var points = create_and_or_gate(x, y);
-    //     if (isNot){
-    //         create_not_gate(x,y);
-    //     }
-    //     else if (isAnd){
-    //         create_and_gate(x,y);
-    //     }
-    //     else if (isOr){
-    //         create_or_gate(x,y);
-    //     }
-    //     gl.bufferSubData (gl.ARRAY_BUFFER, points, flatten(points));
-    //     // render();
-    // });
-
-    // var menu = document.getElementById ("gateMenu");
-    // menu.addEventListener ("click", function () {
-    //     switch (menu.selectedIndex) {
-    //         case 0:
-    //             isAnd = true;
-    //             isOr = false
-    //             isNot = false;
-    //             // render();
-    //             break;
-    //         case 1:
-    //             isAnd = false;
-    //             isOr = true;
-    //             isNot = false;
-    //             // render();
-    //             break;
-    //         case 2:
-    //             isAnd = false;
-    //             isOr = false;
-    //             isNot = true;
-    //     }
-    // })
-    //render();
 };
 
 // Each player rolls a die to determine who goes first
@@ -233,11 +194,21 @@ function renderRectangleBoard() {
     gl.drawArrays( gl.TRIANGLES, 0, rectangleBoardPoints.length )
 }
 
-function render() {
-    //gl.clear( gl.COLOR_BUFFER_BIT );
-    gl.uniform4fv (colorLoc, color);
-    gl.drawArrays( gl.LINES, 0, points.length );
-    requestAnimFrame (render);
+function renderPieces(program){
+    for (var i = 0; i < gamePieces.length; i++) {
+        gamePieces[i].fillPointsArray();
+        var gamePieceBufferId = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, gamePieceBufferId);
+        gl.bufferData(gl.ARRAY_BUFFER, flatten(gamePieces[i].points), gl.STATIC_DRAW);
+        color = vec4(0.0, 0.0, 1.0, 1.0);
+
+        vPosition = gl.getAttribLocation(program, "vPosition");
+        gl.vertexAttribPointer(vPosition, 2, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(vPosition);
+
+        gl.uniform4fv(colorLoc, color);
+        gl.drawArrays(gl.TRIANGLE_FAN, 0, gamePieces[i].points.length);
+    }
 }
 
 // Pushes the vertices of each triangle to an array of points based on the triangle's color
@@ -390,7 +361,7 @@ function Triangle(a, b, c, color, leftBound, rightBound, topBound, bottomBound, 
         if (y > this.bottomBound && y < this.topBound) {
             inLengthBox = true;
         }
-        
+
         return (inWidthBox && inLengthBox);
     };
 }
@@ -403,39 +374,65 @@ function GamePiece(color, position) {
     this.shade = color;
     this.position = position;
     this.points = [];
+    this.xCord = 0;
+    this.yCord = 0;
 }
 
-GamePiece.prototype.addPoints = function(){
-
+GamePiece.prototype.setCenter = function(){
+    if (this.position < 6){
+        this.xCord = ((5/7 - this.position/7) + (6/7 - this.position/7))/2;
+        this.yCord = triangles[this.position].pieceNumber*1/15*-1
+    }
+    else if (this.position < 12 && this.position > 5){
+        this.xCord = ((-2/7 - (this.position-6)/7) + (-1/7 - (this.position-6)/7))/2;
+        this.yCord = triangles[this.position].pieceNumber*1/15*-1
+    }
+    else if (this.position < 18 && this.posiiton > 11){
+        this.xCord = ((-1 + (this.position-12)/7) + (-1 + (this.position-11)/7))/2;
+        this.yCord = triangles[this.position].pieceNumber*1/15
+    }
+    else if (this.position < 24 && this.posiiton > 17){
+        this.xCord = ((this.position-18)/7 + (this.position-17)/7)/2;
+        this.yCord = triangles[this.position].pieceNumber*1/15
+    }
 };
 
 GamePiece.prototype.setLocation = function(position){
-    this.position = position
+    this.position = position;
+};
+
+GamePiece.prototype.fillPointsArray = function(){
+    this.setCenter();
+    for (var theta = 0; theta < Math.PI*2; theta += Math.PI/20){
+        var p = vec2((-(1/14) - Math.cos(theta))*.1+this.xCord, Math.sin(theta)*.1+this.yCord);
+        this.points.push(p);
+    }
 };
 
 function fillGamePieceArray(){
     for (var i = 0; i < 2; i++){
-        this.gamePieces.push(new GamePiece(red, 0));
+        this.gamePieces.push(new GamePiece("red", 0));
         this.triangles[0].pieceNumber +=1;
-        this.gamePieces.push(new GamePiece(black, 23));
+        this.gamePieces.push(new GamePiece("black", 23));
         this.triangles[23].pieceNumber +=1;
     }
 
     for (i = 0; i < 3; i++){
-        this.gamePieces.push(new GamePiece(red, 16));
+        this.gamePieces.push(new GamePiece("red", 16));
         this.triangles[16].pieceNumber +=1;
-        this.gamePieces.push(new GamePiece(black, 7));
+        this.gamePieces.push(new GamePiece("black", 7));
         this.triangles[7].pieceNumber +=1;
     }
 
     for (i = 0; i < 5; i++){
-        this.gamePieces.push(new GamePiece(red, 11));
+        this.gamePieces.push(new GamePiece("red", 11));
         this.triangles[11].pieceNumber +=1;
-        this.gamePieces.push(new GamePiece(red, 18));
+        this.gamePieces.push(new GamePiece("red", 18));
         this.triangles[18].pieceNumber +=1;
-        this.gamePieces.push(new GamePiece(black, 5));
+        this.gamePieces.push(new GamePiece("black", 5));
         this.triangles[5].pieceNumber +=1;
-        this.gamePieces.push(new GamePiece(black, 12));
+        this.gamePieces.push(new GamePiece("black", 12));
         this.triangles[12].pieceNumber +=1;
     }
 }
+
