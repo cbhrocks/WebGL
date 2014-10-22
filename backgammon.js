@@ -181,14 +181,6 @@ window.onload = function init() {
                             firstClick = true;
                             var highestGamePieceIndex = getIndexOfHighestGamePieceOnATriangle(indexOfTriangleToMovePieceFrom);
                             if (gamePieces[highestGamePieceIndex].setLocation(indexOfTriangleToMovePieceTo) != false) {
-//                                gamePieces[highestGamePieceIndex].setCenter();
-//                                if (triangles[indexOfTriangleToMovePieceFrom].pieceNumber === 0) {
-//                                    // do nothing
-//                                } else {
-//                                    triangles[indexOfTriangleToMovePieceFrom].pieceNumber -= 1;
-//                                }
-//
-//                                triangles[indexOfTriangleToMovePieceTo].pieceNumber += 1;
                                 eligibleTrianglePositions = [];
                                 piecesMoved++;
                                 renderPieces(program);
