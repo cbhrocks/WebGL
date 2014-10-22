@@ -500,6 +500,8 @@ function Triangle(a, b, c, color, leftBound, rightBound, topBound, bottomBound, 
     this.bottomBound = bottomBound;
     this.position = position;
     this.pieceNumber = 0;
+    this.hasBlackPiece = false;
+    this.hasRedPiece = true;
 
     this.shade = color;
     // this.onClick1 = function(event) {
@@ -576,6 +578,24 @@ GamePiece.prototype.setCenter = function(){
 };
 
 GamePiece.prototype.setLocation = function(position){
+    if (triangles[position].hasRedPiece && triangles[position].pieceNumber > 1 && this.shade == 'black')
+        return false;
+    else if (triangles[position].hasBlackPiece && triangles[position].pieceNumber > 1 && this.shade == 'red')
+        return false;
+    else if (triangles[position].hasRedPiece && triangles[position].pieceNumber == 1 && this.shade == 'black') {
+        for (var i = 0; i < gamePieces.length; i++) {
+            if (gamePieces[i].position == position) {
+                gamePieces[i].setLocation(25);
+            }
+        }
+    }
+    else if (triangles[position].hasBlackPiece && triangles[position].pieceNumber == 1 && this.shade == 'black') {
+        for (i = 0; i < gamePieces.length; i++) {
+            if (gamePieces[i].position == position) {
+                gamePieces[i].setLocation(25);
+            }
+        }
+    }
     this.position = position;
 };
 
