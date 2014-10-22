@@ -562,25 +562,35 @@ GamePiece.prototype.setCenter = function(){
 };
 
 GamePiece.prototype.setLocation = function(position){
-    if (triangles[position].hasRedPiece && triangles[position].pieceNumber > 1 && this.shade == 'black')
+    if (triangles[position].hasRedPiece === true && triangles[position].pieceNumber > 1 && this.shade == 'black')
         return false;
-    else if (triangles[position].hasBlackPiece && triangles[position].pieceNumber > 1 && this.shade == 'red')
+    else if (triangles[position].hasBlackPiece === true && triangles[position].pieceNumber > 1 && this.shade == 'red')
         return false;
-    else if (triangles[position].hasRedPiece && triangles[position].pieceNumber == 1 && this.shade == 'black') {
+    else if (triangles[position].hasRedPiece === true && triangles[position].pieceNumber === 1 && this.shade == 'black') {
         for (var i = 0; i < gamePieces.length; i++) {
-            if (gamePieces[i].position == position) {
+            if (gamePieces[i].position === position) {
                 gamePieces[i].setLocation(25);
             }
         }
     }
-    else if (triangles[position].hasBlackPiece && triangles[position].pieceNumber == 1 && this.shade == 'black') {
+    else if (triangles[position].hasBlackPiece === true && triangles[position].pieceNumber === 1 && this.shade == 'red') {
         for (i = 0; i < gamePieces.length; i++) {
-            if (gamePieces[i].position == position) {
+            if (gamePieces[i].position === position) {
                 gamePieces[i].setLocation(25);
             }
         }
+    }
+    if (triangles[this.position].pieceNumber === 1){
+        triangles[this.position].hasBlackPiece = false;
+        triangles[this.position].hasRedPiece = false;
     }
     this.position = position;
+    if (this.shade === 'red'){
+        triangles[this.position].hasRedPiece = true;
+    }
+    else{
+        triangles[this.position].hasBlackPiece = true;
+    }
 };
 
 GamePiece.prototype.fillPointsArray = function(){
@@ -595,26 +605,34 @@ function fillGamePieceArray(){
     for (var i = 0; i < 2; i++){
         this.gamePieces.push(new GamePiece("red", 0));
         this.triangles[0].pieceNumber +=1;
+        this.triangles[0].hasRedPiece = true;
         this.gamePieces.push(new GamePiece("black", 23));
         this.triangles[23].pieceNumber +=1;
+        this.triangles[23].hasBlackPiece = true;
     }
 
     for (i = 0; i < 3; i++){
         this.gamePieces.push(new GamePiece("red", 16));
         this.triangles[16].pieceNumber +=1;
+        this.triangles[16].hasRedPiece = true;
         this.gamePieces.push(new GamePiece("black", 7));
         this.triangles[7].pieceNumber +=1;
+        this.triangles[7].hasBlackPiece = true;
     }
 
     for (i = 0; i < 5; i++){
         this.gamePieces.push(new GamePiece("red", 11));
         this.triangles[11].pieceNumber +=1;
+        this.triangles[11].hasRedPiece = true;
         this.gamePieces.push(new GamePiece("red", 18));
         this.triangles[18].pieceNumber +=1;
+        this.triangles[18].hasRedPiece = true;
         this.gamePieces.push(new GamePiece("black", 5));
         this.triangles[5].pieceNumber +=1;
+        this.triangles[5].hasBlackPiece = true;
         this.gamePieces.push(new GamePiece("black", 12));
         this.triangles[12].pieceNumber +=1;
+        this.triangles[12].hasBlackPiece = true;
     }
 }
 
