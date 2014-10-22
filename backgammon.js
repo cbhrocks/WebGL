@@ -107,8 +107,8 @@ window.onload = function init() {
             var indexOfTriangleToMovePieceTo;
             // var eligibleTrianglePositions = [];
             for (var i = 0; i < triangles.length; i++) {
-                if (triangles[i].hitTest(x,y) && piecesMoved < maxMoves) {
-                    if(firstClick) {
+                if (triangles[i].hitTest(x,y) && piecesMoved < maxMoves){
+                    if(firstClick && ((currentPlayer.shade == "red" && triangles[i].hasRedPiece) || (currentPlayer.shade == "black" && triangles[i].hasBlackPiece))) {
                         firstClick = false;
                         indexOfTriangleToMovePieceFrom = i;
                         if (currentPlayerIndex == 0) {
@@ -190,6 +190,7 @@ window.onload = function init() {
 
                         } else {
                             alert("You can't move that piece here");
+                            firstClick = true;
                         }
                     }
                 }
