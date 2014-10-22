@@ -113,11 +113,11 @@ window.onload = function init() {
                         indexOfTriangleToMovePieceFrom = i;
                         if (currentPlayerIndex == 0) {
                             if (currentPlayer.canBearOff) {
-                                if (triangles[currentPlayer.dice[0]].pieceNumber == 0) {
+                                if (triangles[24 - currentPlayer.dice[0]].pieceNumber == 0) {
                                     eligibleTrianglePositions.push(i + currentPlayer.dice[0]);
                                 }
 
-                                if (triangles[currentPlayer.dice[1]].pieceNumber == 0) {
+                                if (triangles[24 - currentPlayer.dice[1]].pieceNumber == 0) {
                                     eligibleTrianglePositions.push(i + currentPlayer.dice[1]);
                                 }
 
@@ -126,8 +126,19 @@ window.onload = function init() {
                                 eligibleTrianglePositions.push(i + currentPlayer.dice[1]);
                             }
                         } else {
-                            eligibleTrianglePositions.push(i - currentPlayer.dice[0]);
-                            eligibleTrianglePositions.push(i - currentPlayer.dice[1]);
+                            if (currentPlayer.canBearOff) {
+                                if (triangles[6 - currentPlayer.dice[0]].pieceNumber == 0) {
+                                    eligibleTrianglePositions.push(i - currentPlayer.dice[0]);
+                                }
+
+                                if (triangles[6 - currentPlayer.dice[1]].pieceNumber == 0) {
+                                    eligibleTrianglePositions.push(i - currentPlayer.dice[1]);
+                                }
+
+                            } else {
+                                eligibleTrianglePositions.push(i - currentPlayer.dice[0]);
+                                eligibleTrianglePositions.push(i - currentPlayer.dice[1]);
+                            }
                         }
                         console.log("Move piece from triangle " + indexOfTriangleToMovePieceFrom);
                         console.log("Can move to " + eligibleTrianglePositions[0]  + " or " + eligibleTrianglePositions[1]);
@@ -135,8 +146,13 @@ window.onload = function init() {
                     } else {
                         indexOfTriangleToMovePieceTo = i;
                         console.log("Tried to move to " + indexOfTriangleToMovePieceTo);
-                        if (((indexOfTriangleToMovePieceTo === eligibleTrianglePositions[0]) || (indexOfTriangleToMovePieceTo === eligibleTrianglePositions[1]))) {
+                        if ((indexOfTriangleToMovePieceTo === eligibleTrianglePositions[0]) || (indexOfTriangleToMovePieceTo === eligibleTrianglePositions[1])) {
                             //alert("Clicked a " + triangles[i].shade + " triangle whose number is " + triangles[i].position);
+                            if (indexOfTriangleToMovePieceTo === eligibleTrianglePositions[0]) {
+                                currentPlayer.dice[0] = currentPlayer.dice[1];
+                            } else {
+                                currentPlayer.dice[1] = currentPlayer.dice[0];
+                            }
                             firstClick = true;
                             var highestGamePieceIndex = getIndexOfHighestGamePieceOnATriangle(indexOfTriangleToMovePieceFrom);
                             gamePieces[highestGamePieceIndex].setLocation(indexOfTriangleToMovePieceTo);
