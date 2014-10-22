@@ -520,20 +520,10 @@ GamePiece.prototype.setCenter = function(){
         this.yCord = 1 - (1/14) - triangles[this.position].pieceNumber*(1/15);
         // this.lightness -= triangles[this.position].pieceNumber*(1/15);
     }
-    else if (this.position < 24 && this.position > 17){
+    else if (this.position < 25 && this.position > 17){
         this.xCord = ((this.position-18)/7 + (this.position-17)/7)/2;
         this.yCord = 1 - (1/14) - triangles[this.position].pieceNumber*(1/15);
         // this.lightness -= triangles[this.position].pieceNumber*(1/15);
-    }
-    //bottom right score box
-    else if (this.position === -1){
-        this.xCord = 13/14;
-        this.yCord = -1 + (1/14) + triangles[this.position].pieceNumber*(1/15);
-    }
-    //top right score box
-    else if (this.position === 24){
-        this.xCord = 13/14;
-        this.yCord = 1 - (1/14) - triangles[this.position].pieceNumber*(1/15);
     }
     //black center jail
     else if (this.position === 25 && this.shade === 'black'){
