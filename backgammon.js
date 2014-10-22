@@ -96,6 +96,8 @@ window.onload = function init() {
     renderPieces(program);
 
     eligibleTrianglePositions = [];
+    maxMoves = 2;
+    trianglesMoved = 0;
 
     canvas.addEventListener ("click", function(event) {
         if (currentPlayer.hasRolled()) {
@@ -105,13 +107,24 @@ window.onload = function init() {
             var indexOfTriangleToMovePieceTo;
             // var eligibleTrianglePositions = [];
             for (var i = 0; i < triangles.length; i++) {
-                if (triangles[i].hitTest(x,y)) {
+                if (triangles[i].hitTest(x,y) && trianglesMoved < maxMoves) {
                     if(firstClick) {
                         firstClick = false;
                         indexOfTriangleToMovePieceFrom = i;
                         if (currentPlayerIndex == 0) {
-                            eligibleTrianglePositions.push(i + currentPlayer.dice[0]);
-                            eligibleTrianglePositions.push(i + currentPlayer.dice[1]);
+                            if (currentPlayer.canBearOff) {
+                                if (triangles[currentPlayer.dice[0]].pieceNumber == 0) {
+                                    eligibleTrianglePositions.push(i + currentPlayer.dice[0]);
+                                }
+
+                                if (triangles[currentPlayer.dice[1]].pieceNumber == 0) {
+                                    eligibleTrianglePositions.push(i + currentPlayer.dice[1]);
+                                }
+
+                            } else {
+                                eligibleTrianglePositions.push(i + currentPlayer.dice[0]);
+                                eligibleTrianglePositions.push(i + currentPlayer.dice[1]);
+                            }
                         } else {
                             eligibleTrianglePositions.push(i - currentPlayer.dice[0]);
                             eligibleTrianglePositions.push(i - currentPlayer.dice[1]);
@@ -122,7 +135,7 @@ window.onload = function init() {
                     } else {
                         indexOfTriangleToMovePieceTo = i;
                         console.log("Tried to move to " + indexOfTriangleToMovePieceTo);
-                        if ((indexOfTriangleToMovePieceTo === eligibleTrianglePositions[0]) || (indexOfTriangleToMovePieceTo === eligibleTrianglePositions[1])) {
+                        if (((indexOfTriangleToMovePieceTo === eligibleTrianglePositions[0]) || (indexOfTriangleToMovePieceTo === eligibleTrianglePositions[1]))) {
                             //alert("Clicked a " + triangles[i].shade + " triangle whose number is " + triangles[i].position);
                             firstClick = true;
                             var highestGamePieceIndex = getIndexOfHighestGamePieceOnATriangle(indexOfTriangleToMovePieceFrom);
@@ -136,6 +149,7 @@ window.onload = function init() {
                             
                             triangles[indexOfTriangleToMovePieceTo].pieceNumber += 1;
                             eligibleTrianglePositions = [];
+                            trianglesMoved++;
                             renderPieces(program);
                         } else {
                             alert("You can't move that piece here");
@@ -166,6 +180,7 @@ window.onload = function init() {
             }
             currentPlayer.dice = [];
             currentPlayer = players[currentPlayerIndex];
+            trianglesMoved = 0;
         } else {
             alert("You haven't rolled yet!")
         }
@@ -236,7 +251,12 @@ function Player(nickname, color) {
     this.canBearOff = false;
 
     this.rollDice = function() {
-        this.dice = [ Math.floor(Math.random() * (6)) + 1, Math.floor(Math.random() * (6)) + 1 ];
+        var die1 = Math.floor(Math.random() * (6)) + 1;
+        var die2 = Math.floor(Math.random() * (6)) + 1;
+        if (die1 == die2) {
+            maxMoves = 4;
+        }
+        this.dice = [ die1, die2 ];
     };
 
     this.hasRolled = function() {
