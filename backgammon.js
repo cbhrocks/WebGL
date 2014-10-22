@@ -95,7 +95,7 @@ window.onload = function init() {
     fillGamePieceArray();
     renderPieces(program);
 
-
+    eligibleTrianglePositions = [];
 
     canvas.addEventListener ("click", function(event) {
         if (currentPlayer.hasRolled()) {
@@ -103,7 +103,7 @@ window.onload = function init() {
             var y = -1 + 2*(canvas.height-event.clientY)/canvas.height;
 
             var indexOfTriangleToMovePieceTo;
-            var eligibleTrianglePositions = [];
+            // var eligibleTrianglePositions = [];
             for (var i = 0; i < triangles.length; i++) {
                 if (triangles[i].hitTest(x,y)) {
                     if(firstClick) {
@@ -122,9 +122,9 @@ window.onload = function init() {
                     } else {
                         indexOfTriangleToMovePieceTo = i;
                         console.log("Tried to move to " + indexOfTriangleToMovePieceTo);
-                        if (indexOfTriangleToMovePieceTo == eligibleTrianglePositions[0] || indexOfTriangleToMovePieceTo == eligibleTrianglePositions[1]) {
+                        if ((indexOfTriangleToMovePieceTo === eligibleTrianglePositions[0]) || (indexOfTriangleToMovePieceTo === eligibleTrianglePositions[1])) {
                             //alert("Clicked a " + triangles[i].shade + " triangle whose number is " + triangles[i].position);
-                            firstClick = false;
+                            firstClick = true;
                             var highestGamePieceIndex = getIndexOfHighestGamePieceOnATriangle(indexOfTriangleToMovePieceFrom);
                             gamePieces[highestGamePieceIndex].setLocation(indexOfTriangleToMovePieceTo);
                             gamePieces[highestGamePieceIndex].setCenter();
@@ -135,6 +135,7 @@ window.onload = function init() {
                             }
                             
                             triangles[indexOfTriangleToMovePieceTo].pieceNumber += 1;
+                            eligibleTrianglePositions = [];
                             renderPieces(program);
                         } else {
                             alert("You can't move that piece here");
