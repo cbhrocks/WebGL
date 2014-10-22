@@ -98,34 +98,42 @@ window.onload = function init() {
             var y = -1 + 2*(canvas.height-event.clientY)/canvas.height;
 
             var indexOfTriangleToMovePieceTo;
-            var eligibleTriangles = [];
+            var eligibleTrianglePositions = [];
             for (var i = 0; i < triangles.length; i++) {
                 if (triangles[i].hitTest(x,y)) {
                     if(firstClick) {
                         firstClick = false;
                         indexOfTriangleToMovePieceFrom = i;
+                        if (currentPlayerIndex == 0) {
+                            eligibleTrianglePositions.push(i + currentPlayer.dice[0]);
+                            eligibleTrianglePositions.push(i + currentPlayer.dice[1]);
+                        } else {
+                            eligibleTrianglePositions.push(i - currentPlayer.dice[0]);
+                            eligibleTrianglePositions.push(i - currentPlayer.dice[1]);
+                        }
+                        console.log("Move piece from triangle " + indexOfTriangleToMovePieceFrom);
+                        console.log("Can move to " + eligibleTrianglePositions[0]  + " or " + eligibleTrianglePositions[1]);
                         //alert("Clicked a " + triangles[i].shade + " triangle whose number is " + triangles[i].position);
                     } else {
-                        firstClick = true;
                         indexOfTriangleToMovePieceTo = i;
-                        
-                        //alert("Clicked a " + triangles[i].shade + " triangle whose number is " + triangles[i].position);
-                        
-                        var highestGamePieceIndex = getIndexOfHighestGamePieceOnATriangle(indexOfTriangleToMovePieceFrom);
-                        gamePieces[highestGamePieceIndex].setLocation(indexOfTriangleToMovePieceTo);
-                        gamePieces[highestGamePieceIndex].setCenter();
-                        if (triangles[indexOfTriangleToMovePieceFrom].pieceNumber === 0) {
-                            // do nothing
-                        } else {
-                            triangles[indexOfTriangleToMovePieceFrom].pieceNumber -= 1;
-                        }
-                        
-                        if (triangles[indexOfTriangleToMovePieceTo].pieceNumber === 0) {
+                        console.log("Tried to move to " + indexOfTriangleToMovePieceTo);
+                        if (indexOfTriangleToMovePieceTo == eligibleTrianglePositions[0] || indexOfTriangleToMovePieceTo == eligibleTrianglePositions[1]) {
+                            //alert("Clicked a " + triangles[i].shade + " triangle whose number is " + triangles[i].position);
+                            firstClick = false;
+                            var highestGamePieceIndex = getIndexOfHighestGamePieceOnATriangle(indexOfTriangleToMovePieceFrom);
+                            gamePieces[highestGamePieceIndex].setLocation(indexOfTriangleToMovePieceTo);
+                            gamePieces[highestGamePieceIndex].setCenter();
+                            if (triangles[indexOfTriangleToMovePieceFrom].pieceNumber === 0) {
+                                // do nothing
+                            } else {
+                                triangles[indexOfTriangleToMovePieceFrom].pieceNumber -= 1;
+                            }
+                            
                             triangles[indexOfTriangleToMovePieceTo].pieceNumber += 1;
+                            renderPieces(program);
                         } else {
-                            triangles[indexOfTriangleToMovePieceTo].pieceNumber += 1;
+                            alert("You can't move that piece here");
                         }
-                        renderPieces(program);
                     }
                 }
             }
@@ -158,7 +166,8 @@ window.onload = function init() {
         alert(currentPlayer.nickname + "'s turn");
     }
 
-    currentPlayerIndex = determineFirstMove();
+    currentPlayerIndex = 0; //determineFirstMove();
+    currentPlayer = players[0];
     console.log(playGame);
     //playGame = true;
 
@@ -196,10 +205,29 @@ function determineFirstMove() {
     }
 }
 
+function determineCanBearOff() {
+    var count = 0;
+    for (var i = 18; i < 23; i++) {
+        count += triangles[i].pieceNumber;
+    }
+    if (count === 15) {
+        player1.canBearOff = true;
+    }
+
+    count = 0;
+    for (var i = 0; i < 6; i++) {
+        count += triangles[i].pieceNumber;
+    }
+    if (count === 15) {
+        player2.canBearOff = true;
+    }
+}
+
 function Player(nickname, color) {
     this.nickname = nickname;
     this.shade = color;
     this.dice = [];
+    this.canBearOff = false;
 
     this.rollDice = function() {
         this.dice = [ Math.floor(Math.random() * (6)) + 1, Math.floor(Math.random() * (6)) + 1 ];
@@ -279,6 +307,7 @@ function renderPieces(program){
         gl.uniform4fv(colorLoc, color);
         gl.drawArrays(gl.TRIANGLE_FAN, 0, gamePieces[i].points.length);
     }
+    determineCanBearOff();
 }
 
 // Pushes the vertices of each triangle to an array of points based on the triangle's color
@@ -465,7 +494,7 @@ function GamePiece(color, position) {
     this.shade = color;
     this.position = position;
     this.points = [];
-    this.lightness = 0.7;
+    this.lightness = 1.0;
     this.setCenter();
 }
 
@@ -491,7 +520,7 @@ GamePiece.prototype.setCenter = function(){
         // this.lightness -= triangles[this.position].pieceNumber*(1/15);
     }
     // this.lightness += triangles[this.position].pieceNumber*(1/27);
-    this.lightness = (1 - Math.abs(this.yCord)) + 5/15;
+    this.lightness = Math.abs(this.yCord);
 };
 
 GamePiece.prototype.setLocation = function(position){
