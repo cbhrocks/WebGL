@@ -10,6 +10,11 @@ gamePieces = [];
 
 triangles = [];
 
+redScored = 0;
+blackScored = 0;
+redCentered = 0;
+blackCentered = 0;
+
 var player1 = new Player("Player 1", "red");
 var player2 = new Player("Player 2", "black");
 
@@ -489,6 +494,26 @@ GamePiece.prototype.setCenter = function(){
         this.xCord = ((this.position-18)/7 + (this.position-17)/7)/2;
         this.yCord = 1 - (1/14) - triangles[this.position].pieceNumber*(1/15);
         // this.lightness -= triangles[this.position].pieceNumber*(1/15);
+    }
+    //bottom right score box
+    else if (this.position === 24){
+        this.xCord = 13/14;
+        this.yCord = -1 + (1/14) + triangles[this.position].pieceNumber*(1/15);
+    }
+    //top right score box
+    else if (this.position === 25){
+        this.xCord = 13/14;
+        this.yCord = 1 - (1/14) - triangles[this.position].pieceNumber*(1/15);
+    }
+    //black center jail
+    else if (this.position === 26 && this.shade === 'black'){
+        this.xCord = -1/14;
+        this.yCord = 1/15 + (1/15)*blackCentered
+    }
+    //red center jail
+    else if (this.position === 26 && this.shade === 'red'){
+        this.xCord = -1/14;
+        this.yCord = -1/15 - (1/15)*redCentered
     }
     // this.lightness += triangles[this.position].pieceNumber*(1/27);
     this.lightness = (1 - Math.abs(this.yCord)) + 5/15;
