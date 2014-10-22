@@ -111,7 +111,7 @@ window.onload = function init() {
                     if(firstClick && ((currentPlayer.shade == "red" && triangles[i].hasRedPiece) || (currentPlayer.shade == "black" && triangles[i].hasBlackPiece))) {
                         firstClick = false;
                         indexOfTriangleToMovePieceFrom = i;
-                        if (currentPlayerIndex == 0) {
+                        if (currentPlayerIndex === 0) {
                             if (currentPlayer.canBearOff == true) {
                                 // if there are no pieces at the triangle corresponding to die 1
                                 if (triangles[24 - currentPlayer.dice[0]].pieceNumber == 0) {
@@ -135,8 +135,8 @@ window.onload = function init() {
                                 }
 
                             } else {
-                                eligibleTrianglePositions.push(i + currentPlayer.dice[0]);
-                                eligibleTrianglePositions.push(i + currentPlayer.dice[1]);
+                                eligibleTrianglePositions.push(indexOfTriangleToMovePieceFrom + currentPlayer.dice[0]);
+                                eligibleTrianglePositions.push(indexOfTriangleToMovePieceFrom + currentPlayer.dice[1]);
                             }
                         } else {
                             if (currentPlayer.canBearOff == true) {
@@ -161,8 +161,8 @@ window.onload = function init() {
                                 }
 
                             } else {
-                                eligibleTrianglePositions.push(i - currentPlayer.dice[0]);
-                                eligibleTrianglePositions.push(i - currentPlayer.dice[1]);
+                                eligibleTrianglePositions.push(indexOfTriangleToMovePieceFrom - currentPlayer.dice[0]);
+                                eligibleTrianglePositions.push(indexOfTriangleToMovePieceFrom - currentPlayer.dice[1]);
                             }
                         }
                         console.log("Move piece from triangle " + indexOfTriangleToMovePieceFrom);
@@ -185,11 +185,12 @@ window.onload = function init() {
                                 piecesMoved++;
                                 renderPieces(program);
                             } else {
-                                alert("You can't move that piece here");
+                                alert("You can't move that piece here\nPick the piece you want to move again");
+                                firstClick = true;
                             }
 
                         } else {
-                            alert("You can't move that piece here");
+                            alert("You can't move that piece here\nPick the piece you want to move again");
                             firstClick = true;
                         }
                     }
