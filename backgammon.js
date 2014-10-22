@@ -496,22 +496,22 @@ GamePiece.prototype.setCenter = function(){
         // this.lightness -= triangles[this.position].pieceNumber*(1/15);
     }
     //bottom right score box
-    else if (this.position === 24){
+    else if (this.position === -1){
         this.xCord = 13/14;
         this.yCord = -1 + (1/14) + triangles[this.position].pieceNumber*(1/15);
     }
     //top right score box
-    else if (this.position === 25){
+    else if (this.position === 24){
         this.xCord = 13/14;
         this.yCord = 1 - (1/14) - triangles[this.position].pieceNumber*(1/15);
     }
     //black center jail
-    else if (this.position === 26 && this.shade === 'black'){
+    else if (this.position === 25 && this.shade === 'black'){
         this.xCord = -1/14;
         this.yCord = 1/15 + (1/15)*blackCentered
     }
     //red center jail
-    else if (this.position === 26 && this.shade === 'red'){
+    else if (this.position === 25 && this.shade === 'red'){
         this.xCord = -1/14;
         this.yCord = -1/15 - (1/15)*redCentered
     }
