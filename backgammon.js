@@ -3,12 +3,12 @@
 var gl;
 
 var points = [];
-var blackBoardPoints = [];
-var redBoardPoints = [];
+blackBoardPoints = [];
+redBoardPoints = [];
 var rectangleBoardPoints = [];
-var gamePieces = [];
+gamePieces = [];
 
-var triangles = [];
+triangles = [];
 
 var player1 = new Player("Player 1", "red");
 var player2 = new Player("Player 2", "black");
@@ -24,6 +24,8 @@ var playGame; //= true;
 var color;
 var colorLoc;
 
+indexOfTriangleToMovePieceFrom = 0;
+
 window.onload = function init() {
     var canvas = document.getElementById( "gl-canvas" );
 
@@ -34,7 +36,7 @@ window.onload = function init() {
     //  Configure WebGL
     //
     gl.viewport( 0, 0, canvas.width, canvas.height );
-    gl.clearColor( 1.0, 0.8, 0.7, 1.0 );
+    gl.clearColor( 0.7, 0.39, 0.2, 1.0 );
 
     //  Load shaders and initialize attribute buffers
 
@@ -42,7 +44,7 @@ window.onload = function init() {
     gl.useProgram( program );
 
     // Load the data into the GPU
-    color = vec4 (0.0, 0.0, 0.0, 1.0);
+    // color = vec4 (0.0, 0.0, 0.0, 1.0);
     colorLoc = gl.getUniformLocation (program, "color");
 
     // setTriangleCoords(1, "red", "black");
@@ -88,28 +90,47 @@ window.onload = function init() {
     fillGamePieceArray();
     renderPieces(program);
 
+
+
     canvas.addEventListener ("click", function(event) {
-        var x = -1 + 2*(event.clientX)/canvas.width;
-        var y = -1 + 2*(canvas.height-event.clientY)/canvas.height;
-        var indexOfTriangleToMovePieceFrom;
-        var indexOfTriangleToMovePieceTo;
-        for (var i = 0; i < triangles.length; i++) {
-            if (triangles[i].hitTest(x,y)) {
-                if(firstClick) {
-                    firstClick = false;
-                    indexOfTriangleToMovePieceFrom = i;
-                    alert("Clicked a " + triangles[i].shade + " triangle whose number is " + triangles[i].position);
-                } else {
-                    firstClick = true;
-                    indexOfTriangleToMovePieceTo = i;
-                    alert("Clicked a " + triangles[i].shade + " triangle whose number is " + triangles[i].position);
-                    triangles[indexOfTriangleToMovePieceFrom].pieceNumber -= 1;
-                    triangles[indexOfTriangleToMovePieceTo].pieceNumber += 1;
-                    // TODO: need to access gamePiece and setLocation to ith triangle
-                    gamePieces[getIndexOfHighestGamePieceOnATriangle].setLocation(indexOfTriangleToMovePieceTo);
-                    renderPieces(program);
+        if (currentPlayer.hasRolled()) {
+            var x = -1 + 2*(event.clientX)/canvas.width;
+            var y = -1 + 2*(canvas.height-event.clientY)/canvas.height;
+
+            var indexOfTriangleToMovePieceTo;
+            var eligibleTriangles = [];
+            for (var i = 0; i < triangles.length; i++) {
+                if (triangles[i].hitTest(x,y)) {
+                    if(firstClick) {
+                        firstClick = false;
+                        indexOfTriangleToMovePieceFrom = i;
+                        //alert("Clicked a " + triangles[i].shade + " triangle whose number is " + triangles[i].position);
+                    } else {
+                        firstClick = true;
+                        indexOfTriangleToMovePieceTo = i;
+                        
+                        //alert("Clicked a " + triangles[i].shade + " triangle whose number is " + triangles[i].position);
+                        
+                        var highestGamePieceIndex = getIndexOfHighestGamePieceOnATriangle(indexOfTriangleToMovePieceFrom);
+                        gamePieces[highestGamePieceIndex].setLocation(indexOfTriangleToMovePieceTo);
+                        gamePieces[highestGamePieceIndex].setCenter();
+                        if (triangles[indexOfTriangleToMovePieceFrom].pieceNumber === 0) {
+                            // do nothing
+                        } else {
+                            triangles[indexOfTriangleToMovePieceFrom].pieceNumber -= 1;
+                        }
+                        
+                        if (triangles[indexOfTriangleToMovePieceTo].pieceNumber === 0) {
+                            triangles[indexOfTriangleToMovePieceTo].pieceNumber += 1;
+                        } else {
+                            triangles[indexOfTriangleToMovePieceTo].pieceNumber += 1;
+                        }
+                        renderPieces(program);
+                    }
                 }
             }
+        } else {
+            alert("You need to roll first");
         }
     });
 
@@ -190,25 +211,54 @@ function Player(nickname, color) {
 }
 
 // Draws the black triangles on the board
-function renderBlackBoard() {
+function renderBlackBoard(program) {
     gl.clear( gl.COLOR_BUFFER_BIT );
-    gl.uniform4fv (colorLoc, color);
+
+    var blackBufferId = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, blackBufferId );
+    gl.bufferData( gl.ARRAY_BUFFER, flatten(blackBoardPoints), gl.STATIC_DRAW );
+
+    vPosition = gl.getAttribLocation(program, "vPosition");
+    gl.vertexAttribPointer(vPosition, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(vPosition);
+
+    gl.uniform4fv (colorLoc, vec4(0.0, 0.0, 0.0, 1.0));
     gl.drawArrays( gl.TRIANGLES, 0, blackBoardPoints.length )
 }
 
 // Draws the red triangles on the board
-function renderRedBoard() {
-    gl.uniform4fv (colorLoc, color);
+function renderRedBoard(program) {
+    var redBufferId = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, redBufferId );
+    gl.bufferData( gl.ARRAY_BUFFER, flatten(redBoardPoints), gl.STATIC_DRAW );
+
+    vPosition = gl.getAttribLocation(program, "vPosition");
+    gl.vertexAttribPointer(vPosition, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(vPosition);
+
+    gl.uniform4fv (colorLoc, vec4(1.0, 0.0, 0.0, 1.0));
     gl.drawArrays( gl.TRIANGLES, 0, redBoardPoints.length )
 }
 
 // Draws the two vertical bars on the board
-function renderRectangleBoard() {
-    gl.uniform4fv (colorLoc, color);
+function renderRectangleBoard(program) {
+    var rectangleBufferId = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, rectangleBufferId );
+    gl.bufferData( gl.ARRAY_BUFFER, flatten(rectangleBoardPoints), gl.STATIC_DRAW );
+
+    vPosition = gl.getAttribLocation(program, "vPosition");
+    gl.vertexAttribPointer(vPosition, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(vPosition);
+        
+
+    gl.uniform4fv (colorLoc, vec4 (0.5, 0.15, 0.1, 1.0));
     gl.drawArrays( gl.TRIANGLES, 0, rectangleBoardPoints.length )
 }
 
 function renderPieces(program){
+    renderBlackBoard(program);
+    renderRedBoard(program);
+    renderRectangleBoard(program);
     for (var i = 0; i < gamePieces.length; i++) {
         gamePieces[i].fillPointsArray();
         var gamePieceBufferId = gl.createBuffer();
@@ -216,7 +266,7 @@ function renderPieces(program){
         gl.bufferData(gl.ARRAY_BUFFER, flatten(gamePieces[i].points), gl.STATIC_DRAW);
 
         if (gamePieces[i].shade === "red") {
-            color = vec4(0.5, 0.1, 0.1, gamePieces[i].lightness);
+            color = vec4(0.6, 0.0, 0.0, gamePieces[i].lightness);
         }
         else{
             color = vec4(0.1, 0.1, 0.1, gamePieces[i].lightness);
@@ -415,7 +465,7 @@ function GamePiece(color, position) {
     this.shade = color;
     this.position = position;
     this.points = [];
-    this.lightness = 1;
+    this.lightness = 0.7;
     this.setCenter();
 }
 
@@ -423,23 +473,25 @@ GamePiece.prototype.setCenter = function(){
     if (this.position < 6){
         this.xCord = ((5/7 - this.position/7) + (6/7 - this.position/7))/2;
         this.yCord = -1 + (1/14) + triangles[this.position].pieceNumber*(1/15);
-        this.lightness -= triangles[this.position].pieceNumber*(1/15);
+        // this.lightness -= triangles[this.position].pieceNumber*(1/15);
     }
     else if (this.position < 12 && this.position > 5){
         this.xCord = ((-2/7 - (this.position-6)/7) + (-1/7 - (this.position-6)/7))/2;
         this.yCord = -1 + (1/14) + triangles[this.position].pieceNumber*(1/15);
-        this.lightness -= triangles[this.position].pieceNumber*(1/15);
+        // this.lightness -= triangles[this.position].pieceNumber*(1/15);
     }
     else if (this.position < 18 && this.position > 11){
         this.xCord = ((-1 + (this.position-12)/7) + (-1 + (this.position-11)/7))/2;
         this.yCord = 1 - (1/14) - triangles[this.position].pieceNumber*(1/15);
-        this.lightness -= triangles[this.position].pieceNumber*(1/15);
+        // this.lightness -= triangles[this.position].pieceNumber*(1/15);
     }
     else if (this.position < 24 && this.position > 17){
         this.xCord = ((this.position-18)/7 + (this.position-17)/7)/2;
         this.yCord = 1 - (1/14) - triangles[this.position].pieceNumber*(1/15);
-        this.lightness -= triangles[this.position].pieceNumber*(1/15);
+        // this.lightness -= triangles[this.position].pieceNumber*(1/15);
     }
+    // this.lightness += triangles[this.position].pieceNumber*(1/27);
+    this.lightness = (1 - Math.abs(this.yCord)) + 5/15;
 };
 
 GamePiece.prototype.setLocation = function(position){
@@ -447,6 +499,7 @@ GamePiece.prototype.setLocation = function(position){
 };
 
 GamePiece.prototype.fillPointsArray = function(){
+    this.points = [];
     for (var theta = 0; theta < Math.PI*2; theta += Math.PI/20){
         var p = vec2((Math.cos(theta))*(1/14)+this.xCord, Math.sin(theta)*(1/14)+this.yCord);
         this.points.push(p);
