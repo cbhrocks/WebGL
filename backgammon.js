@@ -181,14 +181,14 @@ window.onload = function init() {
                             firstClick = true;
                             var highestGamePieceIndex = getIndexOfHighestGamePieceOnATriangle(indexOfTriangleToMovePieceFrom);
                             if (gamePieces[highestGamePieceIndex].setLocation(indexOfTriangleToMovePieceTo) != false) {
-                                gamePieces[highestGamePieceIndex].setCenter();
-                                if (triangles[indexOfTriangleToMovePieceFrom].pieceNumber === 0) {
-                                    // do nothing
-                                } else {
-                                    triangles[indexOfTriangleToMovePieceFrom].pieceNumber -= 1;
-                                }
-                                
-                                triangles[indexOfTriangleToMovePieceTo].pieceNumber += 1;
+//                                gamePieces[highestGamePieceIndex].setCenter();
+//                                if (triangles[indexOfTriangleToMovePieceFrom].pieceNumber === 0) {
+//                                    // do nothing
+//                                } else {
+//                                    triangles[indexOfTriangleToMovePieceFrom].pieceNumber -= 1;
+//                                }
+//
+//                                triangles[indexOfTriangleToMovePieceTo].pieceNumber += 1;
                                 eligibleTrianglePositions = [];
                                 piecesMoved++;
                                 renderPieces(program);
@@ -214,7 +214,7 @@ window.onload = function init() {
         } else {
             alert("You can't roll again!\nYou already rolled a " + currentPlayer.dice[0] + " and a " + currentPlayer.dice[1]);
         }
-    }
+    };
 
     document.getElementById("EndTurn").onclick = function() {
         if (currentPlayer.hasRolled()) {
@@ -230,7 +230,7 @@ window.onload = function init() {
             alert("You haven't rolled yet!")
         }
         alert(currentPlayer.nickname + "'s turn");
-    }
+    };
 
     currentPlayerIndex = 0; //determineFirstMove();
     currentPlayer = players[0];
@@ -532,7 +532,7 @@ function Triangle(a, b, c, color, leftBound, rightBound, topBound, bottomBound, 
     this.position = position;
     this.pieceNumber = 0;
     this.hasBlackPiece = false;
-    this.hasRedPiece = true;
+    this.hasRedPiece = false;
 
     this.shade = color;
     // this.onClick1 = function(event) {
@@ -577,22 +577,18 @@ GamePiece.prototype.setCenter = function(){
     if (this.position < 6){
         this.xCord = ((5/7 - this.position/7) + (6/7 - this.position/7))/2;
         this.yCord = -1 + (1/14) + triangles[this.position].pieceNumber*(1/15);
-        // this.lightness -= triangles[this.position].pieceNumber*(1/15);
     }
     else if (this.position < 12 && this.position > 5){
         this.xCord = ((-2/7 - (this.position-6)/7) + (-1/7 - (this.position-6)/7))/2;
         this.yCord = -1 + (1/14) + triangles[this.position].pieceNumber*(1/15);
-        // this.lightness -= triangles[this.position].pieceNumber*(1/15);
     }
     else if (this.position < 18 && this.position > 11){
         this.xCord = ((-1 + (this.position-12)/7) + (-1 + (this.position-11)/7))/2;
         this.yCord = 1 - (1/14) - triangles[this.position].pieceNumber*(1/15);
-        // this.lightness -= triangles[this.position].pieceNumber*(1/15);
     }
     else if (this.position < 25 && this.position > 17){
         this.xCord = ((this.position-18)/7 + (this.position-17)/7)/2;
         this.yCord = 1 - (1/14) - triangles[this.position].pieceNumber*(1/15);
-        // this.lightness -= triangles[this.position].pieceNumber*(1/15);
     }
     //black center jail
     else if (this.position === 25 && this.shade === 'black'){
@@ -605,25 +601,36 @@ GamePiece.prototype.setCenter = function(){
         this.yCord = -1/15 - (1/15)*redCentered
     }
     // this.lightness += triangles[this.position].pieceNumber*(1/27);
-    this.lightness = Math.abs(this.yCord);
+    if (this.position != 25){
+        this.lightness = 1 - triangles[this.position].pieceNumber*(1/15);
+    }
 };
 
 GamePiece.prototype.setLocation = function(position){
-    if (triangles[position].hasRedPiece === true && triangles[position].pieceNumber > 1 && this.shade == 'black')
+    if (position == 25){
+        triangles[this.position].pieceNumber--;
+        this.position = position;
+        return true;
+    }
+    else if (triangles[position].hasRedPiece && triangles[position].pieceNumber > 1 && this.shade == 'black')
         return false;
-    else if (triangles[position].hasBlackPiece === true && triangles[position].pieceNumber > 1 && this.shade == 'red')
+    else if (triangles[position].hasBlackPiece && triangles[position].pieceNumber > 1 && this.shade == 'red')
         return false;
-    else if (triangles[position].hasRedPiece === true && triangles[position].pieceNumber === 1 && this.shade == 'black') {
+    else if (triangles[position].hasRedPiece && triangles[position].pieceNumber === 1 && this.shade == 'black') {
         for (var i = 0; i < gamePieces.length; i++) {
             if (gamePieces[i].position === position) {
+                triangles[position].hasRedPiece = false;
                 gamePieces[i].setLocation(25);
+                gamePieces[i].setCenter();
             }
         }
     }
-    else if (triangles[position].hasBlackPiece === true && triangles[position].pieceNumber === 1 && this.shade == 'red') {
+    else if (triangles[position].hasBlackPiece && triangles[position].pieceNumber === 1 && this.shade == 'red') {
         for (i = 0; i < gamePieces.length; i++) {
             if (gamePieces[i].position === position) {
+                triangles[position].hasBlackPiece = false;
                 gamePieces[i].setLocation(25);
+                gamePieces[i].setCenter()
             }
         }
     }
@@ -631,13 +638,19 @@ GamePiece.prototype.setLocation = function(position){
         triangles[this.position].hasBlackPiece = false;
         triangles[this.position].hasRedPiece = false;
     }
+
+    triangles[this.position].pieceNumber--;
     this.position = position;
+    this.setCenter();
+    triangles[this.position].pieceNumber++;
+
     if (this.shade === 'red'){
         triangles[this.position].hasRedPiece = true;
     }
     else{
         triangles[this.position].hasBlackPiece = true;
     }
+    return true;
 };
 
 GamePiece.prototype.fillPointsArray = function(){
