@@ -7,7 +7,7 @@ function initGL(canvas) {
     } catch (e) {
     }
     if (!gl) {
-        alert("Could not initialise WebGL, sorry :-(");
+        alert("Could not initialize WebGL, sorry :-(");
     }
 }
 function getShader(gl, id) {
@@ -48,7 +48,7 @@ function initShaders() {
     gl.attachShader(shaderProgram, fragmentShader);
     gl.linkProgram(shaderProgram);
     if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-        alert("Could not initialise shaders");
+        alert("Could not initialize shaders");
     }
     gl.useProgram(shaderProgram);
     shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
@@ -83,7 +83,7 @@ function initTexture() {
     moonTexture.image.onload = function () {
         handleLoadedTexture(moonTexture)
     }
-    moonTexture.image.src = "earthMap_2.jpg";
+    moonTexture.image.src = "sunMap_2.jpg";
 }
 var mvMatrix = mat4.create();
 var mvMatrixStack = [];
