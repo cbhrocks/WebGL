@@ -107,7 +107,7 @@ function initTextures() {
     moonTexture.image.onload = function () {
         handleLoadedTexture(moonTexture)
     }
-    moonTexture.image.src = "moon.gif";
+    moonTexture.image.src = "earthMap_2.jpg";
 
     crateTexture = gl.createTexture();
     crateTexture.image = new Image();
@@ -487,10 +487,23 @@ function tick() {
 
 function webGLStart() {
     var canvas = document.getElementById("lesson12-canvas");
-    initGL(canvas);
-    initShaders();
-    initBuffers();
-    initTextures();
+    var ctx = canvas.getContext('experimental-webgl');
+    
+    window.addEventListener('resize', resizeCanvas, false);
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        initGL(canvas);
+        initShaders();
+        initBuffers();
+        initTextures();
+
+        gl.viewport(0, 0, canvas.width, canvas.height);
+    }
+    
+    resizeCanvas();
 
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.enable(gl.DEPTH_TEST);
