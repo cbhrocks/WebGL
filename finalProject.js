@@ -111,6 +111,7 @@ function initTextures() {
         handleLoadedTexture(earthTexture)
     }
     earthTexture.image.src = "earthMap_2.jpg";
+    planets[0].setPlanetTexture(earthTexture);
 
     crateTexture = gl.createTexture();
     crateTexture.image = new Image();
@@ -125,6 +126,7 @@ function initTextures() {
         handleLoadedTexture(jupiterTexture)
     }
     jupiterTexture.image.src = "jupiterMap_2.jpg";
+    planets[1].setPlanetTexture(jupiterTexture);
 }
 
 
@@ -160,21 +162,147 @@ function degToRad(degrees) {
     return degrees * Math.PI / 180;
 }
 
+var Planet = (function() {
+    function Planet(radius, xpos, ypos, longitudeBands, latitudeBands, angle){
+        this._longitudeBands = longitudeBands;
+        this._latitudeBands = latitudeBands;
+        this._radius = radius;
+        this._xpos = xpos;
+        this._ypos = ypos;
+        this._angle = angle
+        this._texture;
+        this._vertexPositionData = [];
+        this._normalData = [];
+        this._textureCoordData = [];
+        this._indexData = [];
+    };
+
+    this._vertexPositionBuffer;
+    this._vertexNormalBuffer;
+    this._vertexTextureCoordBuffer;
+    this._vertexIndexBuffer;
+
+    Planet.prototype.initPlanetBuffers = function(){
+        this.fillPlanetArrays();
+        this.createPlanetBufferData();
+    };
+
+    Planet.prototype.fillPlanetArrays = function(){
+        for (var latNumber=0; latNumber <= this._latitudeBands; latNumber++) {
+            var theta = latNumber * Math.PI / this._latitudeBands;
+            var sinTheta = Math.sin(theta);
+            var cosTheta = Math.cos(theta);
+
+            for (var longNumber=0; longNumber <= this._longitudeBands; longNumber++) {
+                var phi = longNumber * 2 * Math.PI / this._longitudeBands;
+                var sinPhi = Math.sin(phi);
+                var cosPhi = Math.cos(phi);
+
+                var x = cosPhi * sinTheta;
+                var y = cosTheta;
+                var z = sinPhi * sinTheta;
+                var u = 1 - (longNumber / this._longitudeBands);
+                var v = 1 - (latNumber / this._latitudeBands);
+
+                this._normalData.push(x);
+                this._normalData.push(y);
+                this._normalData.push(z);
+                this._textureCoordData.push(u);
+                this._textureCoordData.push(v);
+                this._vertexPositionData.push(this._radius * x + this._xpos);
+                this._vertexPositionData.push(this._radius * y + this._ypos);
+                this._vertexPositionData.push(this._radius * z);
+            }
+        }
+
+        var indexData = [];
+        for (var latNumber=0; latNumber < this._latitudeBands; latNumber++) {
+            for (var longNumber=0; longNumber < this._longitudeBands; longNumber++) {
+                var first = (latNumber * (this._longitudeBands + 1)) + longNumber;
+                var second = first + this._longitudeBands + 1;
+                this._indexData.push(first);
+                this._indexData.push(second);
+                this._indexData.push(first + 1);
+
+                this._indexData.push(second);
+                this._indexData.push(second + 1);
+                this._indexData.push(first + 1);
+            }
+        }
+    };
+
+    Planet.prototype.createPlanetBufferData = function(){
+        this._vertexNormalBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, this._vertexNormalBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this._normalData), gl.STATIC_DRAW);
+        this._vertexNormalBuffer.itemSize = 3;
+        this._vertexNormalBuffer.numItems = this._normalData.length / 3;
+
+        this._vertexTextureCoordBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, this._vertexTextureCoordBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this._textureCoordData), gl.STATIC_DRAW);
+        this._vertexTextureCoordBuffer.itemSize = 2;
+        this._vertexTextureCoordBuffer.numItems = this._textureCoordData.length / 2;
+
+        this._vertexPositionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, this._vertexPositionBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this._vertexPositionData), gl.STATIC_DRAW);
+        this._vertexPositionBuffer.itemSize = 3;
+        this._vertexPositionBuffer.numItems = this._vertexPositionData.length / 3;
+
+        this._vertexIndexBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._vertexIndexBuffer);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this._indexData), gl.STREAM_DRAW);
+        this._vertexIndexBuffer.itemSize = 1;
+        this._vertexIndexBuffer.numItems = this._indexData.length;
+    };
+
+    Planet.prototype.drawPlanet = function(){
+        mvPushMatrix();
+        mat4.rotate(mvMatrix, degToRad(this._angle), [0, 1, 0]);
+        mat4.translate(mvMatrix, [5, 0, 0]);
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, this._texture);
+        gl.uniform1i(shaderProgram.samplerUniform, 0);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this._vertexPositionBuffer);
+        gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, this._vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this._vertexTextureCoordBuffer);
+        gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, this._vertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this._vertexNormalBuffer);
+        gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, this._vertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._vertexIndexBuffer);
+        setMatrixUniforms();
+        gl.drawElements(gl.TRIANGLES, this._vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+        mvPopMatrix();
+    };
+
+    Planet.prototype.setPlanetTexture = function(texture){
+        this._texture = texture;
+    }
+
+    Planet.prototype.setPlanetAngle = function(angle){
+        this._angle = angle;
+    };
+
+    Planet.prototype.getPlanetAngle = function(){
+        return this._angle;
+    };
+
+    return Planet
+})();
 
 var cubeVertexPositionBuffer;
 var cubeVertexNormalBuffer;
 var cubeVertexTextureCoordBuffer;
 var cubeVertexIndexBuffer;
 
-var earthVertexPositionBuffer;
-var earthVertexNormalBuffer;
-var earthVertexTextureCoordBuffer;
-var earthVertexIndexBuffer;
-
-var jupiterVertexPositionBuffer;
-var jupiterVertexNormalBuffer;
-var jupiterVertexTextureCoordBuffer;
-var jupiterVertexIndexBuffer;
+var planets = [];
+planets.push(new Planet(2, 0, 0, 30, 30, 180));
+planets.push(new Planet(2, 10, 0, 30, 30, 180));
 
 function initBuffers() {
     cubeVertexPositionBuffer = gl.createBuffer();
@@ -320,157 +448,11 @@ function initBuffers() {
     cubeVertexIndexBuffer.itemSize = 1;
     cubeVertexIndexBuffer.numItems = 36;
 
-
-    var latitudeBands = 30;
-    var longitudeBands = 30;
-    var radius = 2;
-
-    var vertexPositionData = [];
-    var normalData = [];
-    var textureCoordData = [];
-    for (var latNumber=0; latNumber <= latitudeBands; latNumber++) {
-        var theta = latNumber * Math.PI / latitudeBands;
-        var sinTheta = Math.sin(theta);
-        var cosTheta = Math.cos(theta);
-
-        for (var longNumber=0; longNumber <= longitudeBands; longNumber++) {
-            var phi = longNumber * 2 * Math.PI / longitudeBands;
-            var sinPhi = Math.sin(phi);
-            var cosPhi = Math.cos(phi);
-
-            var x = cosPhi * sinTheta;
-            var y = cosTheta;
-            var z = sinPhi * sinTheta;
-            var u = 1 - (longNumber / longitudeBands);
-            var v = 1 - (latNumber / latitudeBands);
-
-            normalData.push(x);
-            normalData.push(y);
-            normalData.push(z);
-            textureCoordData.push(u);
-            textureCoordData.push(v);
-            vertexPositionData.push(radius * x);
-            vertexPositionData.push(radius * y);
-            vertexPositionData.push(radius * z);
-        }
+    for (var planetNum = 0; planetNum < planets.length; planetNum++){
+        planets[planetNum].initPlanetBuffers();
     }
-
-    var indexData = [];
-    for (var latNumber=0; latNumber < latitudeBands; latNumber++) {
-        for (var longNumber=0; longNumber < longitudeBands; longNumber++) {
-            var first = (latNumber * (longitudeBands + 1)) + longNumber;
-            var second = first + longitudeBands + 1;
-            indexData.push(first);
-            indexData.push(second);
-            indexData.push(first + 1);
-
-            indexData.push(second);
-            indexData.push(second + 1);
-            indexData.push(first + 1);
-        }
-    }
-
-    earthVertexNormalBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, earthVertexNormalBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normalData), gl.STATIC_DRAW);
-    earthVertexNormalBuffer.itemSize = 3;
-    earthVertexNormalBuffer.numItems = normalData.length / 3;
-
-    earthVertexTextureCoordBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, earthVertexTextureCoordBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoordData), gl.STATIC_DRAW);
-    earthVertexTextureCoordBuffer.itemSize = 2;
-    earthVertexTextureCoordBuffer.numItems = textureCoordData.length / 2;
-
-    earthVertexPositionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, earthVertexPositionBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexPositionData), gl.STATIC_DRAW);
-    earthVertexPositionBuffer.itemSize = 3;
-    earthVertexPositionBuffer.numItems = vertexPositionData.length / 3;
-
-    earthVertexIndexBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, earthVertexIndexBuffer);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indexData), gl.STREAM_DRAW);
-    earthVertexIndexBuffer.itemSize = 1;
-    earthVertexIndexBuffer.numItems = indexData.length;
-
-    var latitudeBands = 30;
-    var longitudeBands = 30;
-    var radius = 3;
-
-    var vertexPositionData = [];
-    var normalData = [];
-    var textureCoordData = [];
-    for (var latNumber=0; latNumber <= latitudeBands; latNumber++) {
-        var theta = latNumber * Math.PI / latitudeBands;
-        var sinTheta = Math.sin(theta);
-        var cosTheta = Math.cos(theta);
-
-        for (var longNumber=0; longNumber <= longitudeBands; longNumber++) {
-            var phi = longNumber * 2 * Math.PI / longitudeBands;
-            var sinPhi = Math.sin(phi);
-            var cosPhi = Math.cos(phi);
-
-            var x = cosPhi * sinTheta;
-            var y = cosTheta;
-            var z = sinPhi * sinTheta;
-            var u = 1 - (longNumber / longitudeBands);
-            var v = 1 - (latNumber / latitudeBands);
-
-            normalData.push(x);
-            normalData.push(y);
-            normalData.push(z);
-            textureCoordData.push(u);
-            textureCoordData.push(v);
-            vertexPositionData.push((radius * x) + 10);
-            vertexPositionData.push(radius * y);
-            vertexPositionData.push(radius * z);
-        }
-    }
-
-    var indexData = [];
-    for (var latNumber=0; latNumber < latitudeBands; latNumber++) {
-        for (var longNumber=0; longNumber < longitudeBands; longNumber++) {
-            var first = (latNumber * (longitudeBands + 1)) + longNumber;
-            var second = first + longitudeBands + 1;
-            indexData.push(first);
-            indexData.push(second);
-            indexData.push(first + 1);
-
-            indexData.push(second);
-            indexData.push(second + 1);
-            indexData.push(first + 1);
-        }
-    }
-
-    jupiterVertexNormalBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, jupiterVertexNormalBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normalData), gl.STATIC_DRAW);
-    jupiterVertexNormalBuffer.itemSize = 3;
-    jupiterVertexNormalBuffer.numItems = normalData.length / 3;
-
-    jupiterVertexTextureCoordBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, jupiterVertexTextureCoordBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoordData), gl.STATIC_DRAW);
-    jupiterVertexTextureCoordBuffer.itemSize = 2;
-    jupiterVertexTextureCoordBuffer.numItems = textureCoordData.length / 2;
-
-    jupiterVertexPositionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, jupiterVertexPositionBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexPositionData), gl.STATIC_DRAW);
-    jupiterVertexPositionBuffer.itemSize = 3;
-    jupiterVertexPositionBuffer.numItems = vertexPositionData.length / 3;
-
-    jupiterVertexIndexBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, jupiterVertexIndexBuffer);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indexData), gl.STREAM_DRAW);
-    jupiterVertexIndexBuffer.itemSize = 1;
-    jupiterVertexIndexBuffer.numItems = indexData.length;
 }
 
-
-var earthAngle = 180;
-var jupiterAngle = 180;
 var cubeAngle = 0;
 
 function drawScene() {
@@ -508,47 +490,9 @@ function drawScene() {
 
     mat4.translate(mvMatrix, [0, 0, -20]);
 
-    mvPushMatrix();
-    mat4.rotate(mvMatrix, degToRad(earthAngle), [0, 1, 0]);
-    mat4.translate(mvMatrix, [5, 0, 0]);
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, earthTexture);
-    gl.uniform1i(shaderProgram.samplerUniform, 0);
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, earthVertexPositionBuffer);
-    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, earthVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, earthVertexTextureCoordBuffer);
-    gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, earthVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, earthVertexNormalBuffer);
-    gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, earthVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, earthVertexIndexBuffer);
-    setMatrixUniforms();
-    gl.drawElements(gl.TRIANGLES, earthVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
-    mvPopMatrix();
-
-    mvPushMatrix();
-    mat4.rotate(mvMatrix, degToRad(jupiterAngle), [0, 1, 0]);
-    mat4.translate(mvMatrix, [5, 0, 0]);
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, jupiterTexture);
-    gl.uniform1i(shaderProgram.samplerUniform, 0);
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, jupiterVertexPositionBuffer);
-    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, jupiterVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, jupiterVertexTextureCoordBuffer);
-    gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, jupiterVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, jupiterVertexNormalBuffer);
-    gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, jupiterVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, jupiterVertexIndexBuffer);
-    setMatrixUniforms();
-    gl.drawElements(gl.TRIANGLES, jupiterVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
-    mvPopMatrix();
+    for (planetNum = 0; planetNum < planets.length; planetNum++){
+        planets[planetNum].drawPlanet();
+    }
 
     mvPushMatrix();
     mat4.rotate(mvMatrix, degToRad(cubeAngle), [0, 1, 0]);
@@ -580,9 +524,13 @@ function animate() {
     if (lastTime != 0) {
         var elapsed = timeNow - lastTime;
 
-        earthAngle += 0.05 * elapsed;
+        for (planetNum = 0; planetNum < planets.length; planetNum++){
+            planets[planetNum].setPlanetAngle(planets[planetNum].getPlanetAngle() + 0.05 * elapsed);
+        }
+
+        // earthAngle += 0.05 * elapsed;
         cubeAngle += 0.05 * elapsed;
-        jupiterAngle += 0.05 * elapsed;
+        // jupiterAngle += 0.05 * elapsed;
     }
     lastTime = timeNow;
 }
