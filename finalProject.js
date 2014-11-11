@@ -258,10 +258,22 @@ function tick() {
 }
 function webGLStart() {
     var canvas = document.getElementById("gl-canvas");
-    initGL(canvas);
-    initShaders();
-    initBuffers();
-    initTexture();
+    var ctx = canvas.getContext('experimental-webgl');
+    
+    window.addEventListener('resize', resizeCanvas, false);
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        initGL(canvas);
+        initShaders();
+        initBuffers();
+        initTexture();
+    }
+    
+    resizeCanvas();
+    
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.enable(gl.DEPTH_TEST);
     canvas.onmousedown = handleMouseDown;
