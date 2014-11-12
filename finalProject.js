@@ -345,12 +345,12 @@ var cubeVertexTextureCoordBuffer;
 var cubeVertexIndexBuffer;
 
 var planets = [];
-planets.push(new Planet(1, 0, 0, 0, 30, 30, 180, .06, .1, "sunMap_2.jpg"));
+planets.push(new Planet(1, 0, 0, 0, 30, 30, 180, .06, .1, "sunMap.jpg"));
 planets.push(new Planet(1, 4, 0, 0, 30, 30, 180, .02, .1, "mercurymap.jpg"));
 planets.push(new Planet(1, 6, 0, 0, 30, 30, 180, .02, .1, "venusmap.jpg"));
-planets.push(new Planet(1, 8, 0, 0, 30, 30, 180, .02, .1, "earthMap_2.jpg"));
+planets.push(new Planet(1, 8, 0, 0, 30, 30, 180, .02, .1, "earthMap.jpg"));
 planets.push(new Planet(1, 10, 0, 0, 30, 30, 180, .02, .1, "marsmap1k.jpg"));
-planets.push(new Planet(1, 12, 0, 0, 30, 30, 180, .02, .1, "jupiterMap_2.jpg"));
+planets.push(new Planet(1, 12, 0, 0, 30, 30, 180, .02, .1, "jupitermap.jpg"));
 planets.push(new Planet(1, 14, 0, 0, 30, 30, 180, .02, .1, "saturnmap.jpg"));
 planets.push(new Planet(1, 16, 0, 0, 30, 30, 180, .02, .1, "uranusmap.jpg"));
 planets.push(new Planet(1, 18, 0, 0, 30, 30, 180, .02, .1, "neptunemap.jpg"));
