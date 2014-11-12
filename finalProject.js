@@ -151,14 +151,17 @@ function degToRad(degrees) {
 }
 
 var Planet = (function() {
-    function Planet(radius, xpos, ypos, zpos, longitudeBands, latitudeBands, angle, textureFile){
+    function Planet(radius, xpos, ypos, zpos, longitudeBands, latitudeBands, initRotateAngle, rotateSpeed, turnSpeed, textureFile){
         this._longitudeBands = longitudeBands;
         this._latitudeBands = latitudeBands;
         this._radius = radius;
         this._xpos = xpos;
         this._ypos = ypos;
         this._zpos = zpos;
-        this._angle = angle;
+        this._rotateAngle = initRotateAngle;
+        this._turnAngle = 0;
+        this._rotateSpeed = rotateSpeed;
+        this._turnSpeed = turnSpeed;
         this._textureFile = textureFile;
         this._texture;
         this._vertexPositionData = [];
@@ -249,8 +252,10 @@ var Planet = (function() {
 
     Planet.prototype.drawPlanet = function(){
         mvPushMatrix();
-        mat4.rotate(mvMatrix, degToRad(this._angle), [0, 1, 0]);
+
+        mat4.rotate(mvMatrix, degToRad(this._rotateAngle), [0, 1, 0]);
         mat4.translate(mvMatrix, [0 + this._xpos, 0 + this._ypos, 0 + this._zpos]);
+        mat4.rotate(mvMatrix, degToRad(this._turnAngle), [0, 1, 0]);
 
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, this._texture);
@@ -273,7 +278,7 @@ var Planet = (function() {
 
     Planet.prototype.setPlanetTexture = function(texture){
         this._texture = texture;
-    }
+    };
 
     Planet.prototype.initPlanetTexture = function(){
         this._texture = gl.createTexture();
@@ -284,15 +289,26 @@ var Planet = (function() {
         }
         this._texture.image.src = this._textureFile;
         // planets[0].setPlanetTexture(this._texture);
+    };
+
+    Planet.prototype.rotateAndTurn = function(elapsed){
+        currentRotateAngle = this.getPlanetRotateAngle();
+        currentTurnAngle = this.getPlanetTurnAngle();
+        this.setPlanetAngles(currentRotateAngle + this._rotateSpeed * elapsed, currentTurnAngle + this._turnSpeed * elapsed);
+    };
+
+    Planet.prototype.setPlanetAngles = function(rotateAngle, turnAngle){
+        this._rotateAngle = rotateAngle;
+        this._turnAngle = turnAngle;
+    };
+
+    Planet.prototype.getPlanetRotateAngle = function(){
+        return this._rotateAngle;
+    };
+
+    Planet.prototype.getPlanetTurnAngle = function(){
+        return this._turnAngle;
     }
-
-    Planet.prototype.setPlanetAngle = function(angle){
-        this._angle = angle;
-    };
-
-    Planet.prototype.getPlanetAngle = function(){
-        return this._angle;
-    };
 
     return Planet
 })();
@@ -303,16 +319,16 @@ var cubeVertexTextureCoordBuffer;
 var cubeVertexIndexBuffer;
 
 var planets = [];
-planets.push(new Planet(2, 0, 0, 0, 30, 30, 120, "sunMap_2.jpg"));
-planets.push(new Planet(2, 5, 0, 0, 30, 30, 120, "mercurymap.jpg"));
-planets.push(new Planet(2, 10, 0, 0, 30, 30, 120, "venusmap.jpg"));
-planets.push(new Planet(2, 15, 0, 0, 30, 30, 120, "earthMap_2.jpg"));
-planets.push(new Planet(2, 20, 0, 0, 30, 30, 120, "marsmap1k.jpg"));
-planets.push(new Planet(2, 25, 0, 0, 30, 30, 120, "jupiterMap_2.jpg"));
-planets.push(new Planet(2, 30, 0, 0, 30, 30, 120, "saturnmap.jpg"));
-planets.push(new Planet(2, 35, 0, 0, 30, 30, 120, "uranusmap.jpg"));
-planets.push(new Planet(2, 40, 0, 0, 30, 30, 120, "neptunemap.jpg"));
-planets.push(new Planet(2, 45, 0, 0, 30, 30, 120, "plutomap1k.jpg"));
+planets.push(new Planet(2, 0, 0, 0, 30, 30, 120, .06, .1, "sunMap_2.jpg"));
+planets.push(new Planet(2, 5, 0, 0, 30, 30, 120, .02, .1, "mercurymap.jpg"));
+planets.push(new Planet(2, 10, 0, 0, 30, 30, 120, .02, .1, "venusmap.jpg"));
+planets.push(new Planet(2, 15, 0, 0, 30, 30, 120, .02, .1, "earthMap_2.jpg"));
+planets.push(new Planet(2, 20, 0, 0, 30, 30, 120, .02, .1, "marsmap1k.jpg"));
+planets.push(new Planet(2, 25, 0, 0, 30, 30, 120, .02, .1, "jupiterMap_2.jpg"));
+planets.push(new Planet(2, 30, 0, 0, 30, 30, 120, .02, .1, "saturnmap.jpg"));
+planets.push(new Planet(2, 35, 0, 0, 30, 30, 120, .02, .1, "uranusmap.jpg"));
+planets.push(new Planet(2, 40, 0, 0, 30, 30, 120, .02, .1, "neptunemap.jpg"));
+planets.push(new Planet(2, 45, 0, 0, 30, 30, 120, .02, .1, "plutomap1k.jpg"));
 
 function initBuffers() {
     cubeVertexPositionBuffer = gl.createBuffer();
@@ -539,7 +555,8 @@ function animate() {
         var elapsed = timeNow - lastTime;
 
         for (planetNum = 0; planetNum < planets.length; planetNum++){
-            planets[planetNum].setPlanetAngle(planets[planetNum].getPlanetAngle() + ((planetNum+1)*.01) * elapsed);
+            planets[planetNum].rotateAndTurn(elapsed)
+            // planets[planetNum].setPlanetAngle(planets[planetNum].getPlanetAngle() + ((planetNum+1)*.01) * elapsed);
         }
 
         // earthAngle += 0.05 * elapsed;
