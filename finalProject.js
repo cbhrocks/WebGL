@@ -123,13 +123,9 @@ var mvMatrixStack = [];
 var pMatrix = mat4.create();
 
 function mvPushMatrix() {
-    // var copy = mat4.create();
-    // mat4.set(mvMatrix, copy);
-    // mvMatrixStack.push(copy);
-
-    var copy = mat4(mvMatrix);
+    var copy = mat4.create();
+    mat4.set(mvMatrix, copy);
     mvMatrixStack.push(copy);
-
 }
 
 function mvPopMatrix() {
@@ -143,36 +139,12 @@ function setMatrixUniforms() {
     gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
     gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
 
-    // var normalMatrix = mat3.create();
-    // mat4.toInverseMat3(mvMatrix, normalMatrix);
-    // mat3.transpose(normalMatrix);
-    // gl.uniformMatrix3fv(shaderProgram.nMatrixUniform, false, normalMatrix);
-
-    var normalMatrix = mat3();
-    mat4ToInverseMat3(mvMatrix, normalMatrix);
-    transpose(normalMatrix);
+    var normalMatrix = mat3.create();
+    mat4.toInverseMat3(mvMatrix, normalMatrix);
+    mat3.transpose(normalMatrix);
     gl.uniformMatrix3fv(shaderProgram.nMatrixUniform, false, normalMatrix);
 }
 
-function mat4ToInverseMat3(mat4, mat3) {
-    var c=mat4[0], d=mat4[1], e=mat4[2], g=mat4[4], f=mat4[5], h=mat4[6], i=mat4[8], j=mat4[9], k=mat4[10];
-    var l=k*f-h*j, o=-k*g+h*i, m=j*g-f*i, n=c*l+d*o+e*m;
-    if(!n) {
-        return null;
-    }
-    n=1/n;
-    mat3||(mat3=mat3());
-    mat3[0]=l*n;
-    mat3[1]=(-k*d+e*j)*n;
-    mat3[2]=(h*d-e*f)*n;
-    mat3[3]=o*n;
-    mat3[4]=(k*c-e*i)*n;
-    mat3[5]=(-h*c+e*g)*n;
-    mat3[6]=m*n;
-    mat3[7]=(-j*c+d*i)*n;
-    mat3[8]=(f*c-d*g)*n;
-    return mat3;
-}
 
 function degToRad(degrees) {
     return degrees * Math.PI / 180;
