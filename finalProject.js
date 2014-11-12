@@ -459,6 +459,7 @@ function drawScene() {
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+    // mat4.perspective(pMatrix, 45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0);
     mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
 
     var lighting = document.getElementById("lighting").checked;
@@ -554,6 +555,11 @@ function webGLStart() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
+        // perspective = mat4.create();
+        // perspective = mat4.perspective(60, canvas.width / canvas.height, 0.1, 100);
+        // perspective[3][3] = 1;
+        // perspective = mat4.multiply(perspective,(mat4.create(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, -5, 0, 0, 0, 1)));
+
         initGL(canvas);
         initShaders();
         initBuffers();
@@ -564,7 +570,7 @@ function webGLStart() {
     
     resizeCanvas();
 
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    gl.clearColor(0.0, 0.0, 0.0, 0.0);
     gl.enable(gl.DEPTH_TEST);
 
     tick();
