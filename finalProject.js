@@ -100,14 +100,18 @@ function handleLoadedTexture(texture) {
 }
 
 
-// var earthTexture;
-// var jupiterTexture;
+var earthTexture;
+var jupiterTexture;
 var crateTexture;
 
 function initTextures() {
-    for (var planetNum = 0; planetNum < planets.length; planetNum++){
-        planets[planetNum].initPlanetTexture();
+    earthTexture = gl.createTexture();
+    earthTexture.image = new Image();
+    earthTexture.image.onload = function () {
+        handleLoadedTexture(earthTexture)
     }
+    earthTexture.image.src = "earthMap_2.jpg";
+    planets[0].setPlanetTexture(earthTexture);
 
     crateTexture = gl.createTexture();
     crateTexture.image = new Image();
@@ -115,6 +119,14 @@ function initTextures() {
         handleLoadedTexture(crateTexture)
     }
     crateTexture.image.src = "crate.gif";
+
+    jupiterTexture = gl.createTexture();
+    jupiterTexture.image = new Image();
+    jupiterTexture.image.onload = function () {
+        handleLoadedTexture(jupiterTexture)
+    }
+    jupiterTexture.image.src = "jupiterMap_2.jpg";
+    planets[1].setPlanetTexture(jupiterTexture);
 }
 
 
@@ -123,13 +135,9 @@ var mvMatrixStack = [];
 var pMatrix = mat4.create();
 
 function mvPushMatrix() {
-    // var copy = mat4.create();
-    // mat4.set(mvMatrix, copy);
-    // mvMatrixStack.push(copy);
-
-    var copy = mat4(mvMatrix);
+    var copy = mat4.create();
+    mat4.set(mvMatrix, copy);
     mvMatrixStack.push(copy);
-
 }
 
 function mvPopMatrix() {
@@ -143,50 +151,25 @@ function setMatrixUniforms() {
     gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
     gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
 
-    // var normalMatrix = mat3.create();
-    // mat4.toInverseMat3(mvMatrix, normalMatrix);
-    // mat3.transpose(normalMatrix);
-    // gl.uniformMatrix3fv(shaderProgram.nMatrixUniform, false, normalMatrix);
-
-    var normalMatrix = mat3();
-    mat4ToInverseMat3(mvMatrix, normalMatrix);
-    transpose(normalMatrix);
+    var normalMatrix = mat3.create();
+    mat4.toInverseMat3(mvMatrix, normalMatrix);
+    mat3.transpose(normalMatrix);
     gl.uniformMatrix3fv(shaderProgram.nMatrixUniform, false, normalMatrix);
 }
 
-function mat4ToInverseMat3(mat4, mat3) {
-    var c=mat4[0], d=mat4[1], e=mat4[2], g=mat4[4], f=mat4[5], h=mat4[6], i=mat4[8], j=mat4[9], k=mat4[10];
-    var l=k*f-h*j, o=-k*g+h*i, m=j*g-f*i, n=c*l+d*o+e*m;
-    if(!n) {
-        return null;
-    }
-    n=1/n;
-    mat3||(mat3=mat3());
-    mat3[0]=l*n;
-    mat3[1]=(-k*d+e*j)*n;
-    mat3[2]=(h*d-e*f)*n;
-    mat3[3]=o*n;
-    mat3[4]=(k*c-e*i)*n;
-    mat3[5]=(-h*c+e*g)*n;
-    mat3[6]=m*n;
-    mat3[7]=(-j*c+d*i)*n;
-    mat3[8]=(f*c-d*g)*n;
-    return mat3;
-}
 
 function degToRad(degrees) {
     return degrees * Math.PI / 180;
 }
 
 var Planet = (function() {
-    function Planet(radius, xpos, ypos, longitudeBands, latitudeBands, angle, textureFile){
+    function Planet(radius, xpos, ypos, longitudeBands, latitudeBands, angle){
         this._longitudeBands = longitudeBands;
         this._latitudeBands = latitudeBands;
         this._radius = radius;
         this._xpos = xpos;
         this._ypos = ypos;
-        this._angle = angle;
-        this._textureFile = textureFile;
+        this._angle = angle
         this._texture;
         this._vertexPositionData = [];
         this._normalData = [];
@@ -226,8 +209,8 @@ var Planet = (function() {
                 this._normalData.push(z);
                 this._textureCoordData.push(u);
                 this._textureCoordData.push(v);
-                this._vertexPositionData.push(this._radius * x);
-                this._vertexPositionData.push(this._radius * y);
+                this._vertexPositionData.push(this._radius * x + this._xpos);
+                this._vertexPositionData.push(this._radius * y + this._ypos);
                 this._vertexPositionData.push(this._radius * z);
             }
         }
@@ -277,8 +260,7 @@ var Planet = (function() {
     Planet.prototype.drawPlanet = function(){
         mvPushMatrix();
         mat4.rotate(mvMatrix, degToRad(this._angle), [0, 1, 0]);
-        mat4.translate(mvMatrix, [0 + this._xpos, 0 + this._ypos, 0]);
-
+        mat4.translate(mvMatrix, [5, 0, 0]);
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, this._texture);
         gl.uniform1i(shaderProgram.samplerUniform, 0);
@@ -302,17 +284,6 @@ var Planet = (function() {
         this._texture = texture;
     }
 
-    Planet.prototype.initPlanetTexture = function(){
-        this._texture = gl.createTexture();
-        this._texture.image = new Image();
-        var tempTexture = this._texture;
-        this._texture.image.onload = function () {
-            handleLoadedTexture(tempTexture)
-        }
-        this._texture.image.src = this._textureFile;
-        // planets[0].setPlanetTexture(this._texture);
-    }
-
     Planet.prototype.setPlanetAngle = function(angle){
         this._angle = angle;
     };
@@ -330,16 +301,8 @@ var cubeVertexTextureCoordBuffer;
 var cubeVertexIndexBuffer;
 
 var planets = [];
-planets.push(new Planet(2, 0, 0, 30, 30, 120, "sunMap_2.jpg"));
-planets.push(new Planet(2, 5, 0, 30, 30, 120, "mercurymap.jpg"));
-planets.push(new Planet(2, 10, 0, 30, 30, 120, "venusmap.jpg"));
-planets.push(new Planet(2, 15, 0, 30, 30, 120, "earthMap_2.jpg"));
-planets.push(new Planet(2, 20, 0, 30, 30, 120, "marsmap1k.jpg"));
-planets.push(new Planet(2, 25, 0, 30, 30, 120, "jupiterMap_2.jpg"));
-planets.push(new Planet(2, 30, 0, 30, 30, 120, "saturnmap.jpg"));
-planets.push(new Planet(2, 35, 0, 30, 30, 120, "uranusmap.jpg"));
-planets.push(new Planet(2, 40, 0, 30, 30, 120, "neptunemap.jpg"));
-planets.push(new Planet(2, 45, 0, 30, 30, 120, "plutomap1k.jpg"));
+planets.push(new Planet(2, 0, 0, 30, 30, 180));
+planets.push(new Planet(2, 10, 0, 30, 30, 180));
 
 function initBuffers() {
     cubeVertexPositionBuffer = gl.createBuffer();
@@ -534,7 +497,6 @@ function drawScene() {
     mvPushMatrix();
     mat4.rotate(mvMatrix, degToRad(cubeAngle), [0, 1, 0]);
     mat4.translate(mvMatrix, [5, 0, 0]);
-
     gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
     gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, cubeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
@@ -563,7 +525,7 @@ function animate() {
         var elapsed = timeNow - lastTime;
 
         for (planetNum = 0; planetNum < planets.length; planetNum++){
-            planets[planetNum].setPlanetAngle(planets[planetNum].getPlanetAngle() + ((planetNum+1)*.01) * elapsed);
+            planets[planetNum].setPlanetAngle(planets[planetNum].getPlanetAngle() + 0.05 * elapsed);
         }
 
         // earthAngle += 0.05 * elapsed;
@@ -593,9 +555,9 @@ function webGLStart() {
         canvas.height = window.innerHeight;
 
         initGL(canvas);
-        initTextures();
         initShaders();
         initBuffers();
+        initTextures();
 
         gl.viewport(0, 0, canvas.width, canvas.height);
     }
