@@ -1,6 +1,8 @@
 /* Charles Horton, Nathan Cheung */
 
 var gl;
+var fieldOfView = 45;
+
 
 function initGL(canvas) {
     try {
@@ -114,7 +116,7 @@ function initTextures() {
     crateTexture.image.onload = function () {
         handleLoadedTexture(crateTexture)
     }
-    crateTexture.image.src = "crate.gif";
+    crateTexture.image.src = "asteroidMap.png";
 }
 
 
@@ -506,11 +508,11 @@ function initBuffers() {
 var cubeAngle = 0;
 
 function drawScene() {
-    gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+    gl.viewport(0, 0, gl.viewportWidth - fieldOfView, gl.viewportHeight - fieldOfView);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    // mat4.perspective(pMatrix, 45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0);
-    mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
+    mat4.perspective(pMatrix, fieldOfView, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0);
+    //mat4.perspective(fieldOfView, gl.viewportWidth/ gl.viewportHeight, 0.1, 100.0, pMatrix);
 
     var lighting = document.getElementById("lighting").checked;
     gl.uniform1i(shaderProgram.useLightingUniform, lighting);
@@ -590,6 +592,41 @@ function animate() {
     lastTime = timeNow;
 }
 
+function makeXRotation(angleInRadians) {
+  var c = Math.cos(angleInRadians);
+  var s = Math.sin(angleInRadians);
+
+  return [
+    1, 0, 0, 0,
+    0, c, s, 0,
+    0, -s, c, 0,
+    0, 0, 0, 1
+  ];
+};
+
+function makeYRotation(angleInRadians) {
+  var c = Math.cos(angleInRadians);
+  var s = Math.sin(angleInRadians);
+
+  return [
+    c, 0, -s, 0,
+    0, 1, 0, 0,
+    s, 0, c, 0,
+    0, 0, 0, 1
+  ];
+};
+
+function makeZRotation(angleInRadians) {
+  var c = Math.cos(angleInRadians);
+  var s = Math.sin(angleInRadians);
+  return [
+     c, s, 0, 0,
+    -s, c, 0, 0,
+     0, 0, 1, 0,
+     0, 0, 0, 1,
+  ];
+}
+
 
 
 function tick() {
@@ -597,7 +634,6 @@ function tick() {
     drawScene();
     animate();
 }
-
 
 function webGLStart() {
     var canvas = document.getElementById("gl-canvas");
@@ -621,6 +657,18 @@ function webGLStart() {
 
         gl.viewport(0, 0, canvas.width, canvas.height);
     }
+
+    document.addEventListener('keyup', function(event) {
+        if (event.keyCode == 38) {
+            fieldOfView += 0.1;
+        }
+    });
+
+    document.addEventListener('keydown', function(event) {
+        if (event.keyCode == 40) {
+            fieldOfView -= 0.1;
+        }
+    });
     
     resizeCanvas();
 
