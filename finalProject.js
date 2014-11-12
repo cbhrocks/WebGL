@@ -1,6 +1,8 @@
 /* Charles Horton, Nathan Cheung */
 
 var gl;
+var fieldOfView = 45;
+
 
 function initGL(canvas) {
     try {
@@ -114,7 +116,7 @@ function initTextures() {
     crateTexture.image.onload = function () {
         handleLoadedTexture(crateTexture)
     }
-    crateTexture.image.src = "crate.gif";
+    crateTexture.image.src = "asteroidMap.png";
 }
 
 
@@ -249,6 +251,12 @@ var Planet = (function() {
     Planet.prototype.drawPlanet = function(){
         mvPushMatrix();
         mat4.rotate(mvMatrix, degToRad(this._angle), [0, 1, 0]);
+        // var rotationXMatrix = makeXRotation(2 * Math.PI);
+        var rotationYMatrix = makeYRotation(2 * Math.PI);
+        // var rotationZMatrix = makeZRotation(2 * Math.PI);
+        // mat4.multiply(mvMatrix, rotationZMatrix);
+        mat4.multiply(mvMatrix, rotationYMatrix);
+        // mat4.multiply(mvMatrix, rotationXMatrix);
         mat4.translate(mvMatrix, [0 + this._xpos, 0 + this._ypos, 0]);
 
         gl.activeTexture(gl.TEXTURE0);
@@ -302,12 +310,12 @@ var cubeVertexTextureCoordBuffer;
 var cubeVertexIndexBuffer;
 
 var planets = [];
-planets.push(new Planet(2, 0, 0, 30, 30, 120, "sunMap_2.jpg"));
+planets.push(new Planet(2, 0, 0, 30, 30, 120, "sunMap.jpg"));
 planets.push(new Planet(2, 5, 0, 30, 30, 120, "mercurymap.jpg"));
 planets.push(new Planet(2, 10, 0, 30, 30, 120, "venusmap.jpg"));
-planets.push(new Planet(2, 15, 0, 30, 30, 120, "earthMap_2.jpg"));
+planets.push(new Planet(2, 15, 0, 30, 30, 120, "earthMap.jpg"));
 planets.push(new Planet(2, 20, 0, 30, 30, 120, "marsmap1k.jpg"));
-planets.push(new Planet(2, 25, 0, 30, 30, 120, "jupiterMap_2.jpg"));
+planets.push(new Planet(2, 25, 0, 30, 30, 120, "jupitermap.jpg"));
 planets.push(new Planet(2, 30, 0, 30, 30, 120, "saturnmap.jpg"));
 planets.push(new Planet(2, 35, 0, 30, 30, 120, "uranusmap.jpg"));
 planets.push(new Planet(2, 40, 0, 30, 30, 120, "neptunemap.jpg"));
@@ -465,11 +473,11 @@ function initBuffers() {
 var cubeAngle = 0;
 
 function drawScene() {
-    gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+    gl.viewport(0, 0, gl.viewportWidth - fieldOfView, gl.viewportHeight - fieldOfView);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    // mat4.perspective(pMatrix, 45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0);
-    mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
+    mat4.perspective(pMatrix, fieldOfView, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0);
+    //mat4.perspective(fieldOfView, gl.viewportWidth/ gl.viewportHeight, 0.1, 100.0, pMatrix);
 
     var lighting = document.getElementById("lighting").checked;
     gl.uniform1i(shaderProgram.useLightingUniform, lighting);
@@ -546,6 +554,41 @@ function animate() {
     lastTime = timeNow;
 }
 
+function makeXRotation(angleInRadians) {
+  var c = Math.cos(angleInRadians);
+  var s = Math.sin(angleInRadians);
+
+  return [
+    1, 0, 0, 0,
+    0, c, s, 0,
+    0, -s, c, 0,
+    0, 0, 0, 1
+  ];
+};
+
+function makeYRotation(angleInRadians) {
+  var c = Math.cos(angleInRadians);
+  var s = Math.sin(angleInRadians);
+
+  return [
+    c, 0, -s, 0,
+    0, 1, 0, 0,
+    s, 0, c, 0,
+    0, 0, 0, 1
+  ];
+};
+
+function makeZRotation(angleInRadians) {
+  var c = Math.cos(angleInRadians);
+  var s = Math.sin(angleInRadians);
+  return [
+     c, s, 0, 0,
+    -s, c, 0, 0,
+     0, 0, 1, 0,
+     0, 0, 0, 1,
+  ];
+}
+
 
 
 function tick() {
@@ -553,7 +596,6 @@ function tick() {
     drawScene();
     animate();
 }
-
 
 function webGLStart() {
     var canvas = document.getElementById("gl-canvas");
@@ -577,6 +619,18 @@ function webGLStart() {
 
         gl.viewport(0, 0, canvas.width, canvas.height);
     }
+
+    document.addEventListener('keyup', function(event) {
+        if (event.keyCode == 38) {
+            fieldOfView += 0.1;
+        }
+    });
+
+    document.addEventListener('keydown', function(event) {
+        if (event.keyCode == 40) {
+            fieldOfView -= 0.1;
+        }
+    });
     
     resizeCanvas();
 
