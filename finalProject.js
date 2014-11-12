@@ -253,9 +253,9 @@ var Planet = (function() {
     Planet.prototype.drawPlanet = function(){
         mvPushMatrix();
 
-        mat4.rotate(mvMatrix, degToRad(this._rotateAngle), [0, 1, 0]);
+        mat4.rotate(mvMatrix, degToRad(this._rotateAngle), [0, 0, 1]);
         mat4.translate(mvMatrix, [0 + this._xpos, 0 + this._ypos, 0 + this._zpos]);
-        mat4.rotate(mvMatrix, degToRad(this._turnAngle), [0, 1, 0]);
+        mat4.rotate(mvMatrix, degToRad(this._turnAngle), [0, 0, 1]);
 
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, this._texture);
@@ -310,6 +310,30 @@ var Planet = (function() {
         return this._turnAngle;
     }
 
+    Planet.prototype.getPlanetXpos = function(){
+        return this._xpos;
+    }
+
+    Planet.prototype.getPlanetYpos = function(){
+        return this._ypos;
+    }
+
+    Planet.prototype.getPlanetZPos = function(){
+        return this._zpos;
+    }
+
+    Planet.prototype.setPlanetXpos = function(xpos){
+        this._xpos = xpos;
+    }
+
+    Planet.prototype.setPlanetYpos = function(ypos){
+        this._ypos = ypos;
+    }
+
+    Planet.prototype.setPlanetZpos = function(zpos){
+        this._zpos = zpos;
+    }
+
     return Planet
 })();
 
@@ -319,16 +343,16 @@ var cubeVertexTextureCoordBuffer;
 var cubeVertexIndexBuffer;
 
 var planets = [];
-planets.push(new Planet(2, 0, 0, 0, 30, 30, 120, .06, .1, "sunMap_2.jpg"));
-planets.push(new Planet(2, 5, 0, 0, 30, 30, 120, .02, .1, "mercurymap.jpg"));
-planets.push(new Planet(2, 10, 0, 0, 30, 30, 120, .02, .1, "venusmap.jpg"));
-planets.push(new Planet(2, 15, 0, 0, 30, 30, 120, .02, .1, "earthMap_2.jpg"));
-planets.push(new Planet(2, 20, 0, 0, 30, 30, 120, .02, .1, "marsmap1k.jpg"));
-planets.push(new Planet(2, 25, 0, 0, 30, 30, 120, .02, .1, "jupiterMap_2.jpg"));
-planets.push(new Planet(2, 30, 0, 0, 30, 30, 120, .02, .1, "saturnmap.jpg"));
-planets.push(new Planet(2, 35, 0, 0, 30, 30, 120, .02, .1, "uranusmap.jpg"));
-planets.push(new Planet(2, 40, 0, 0, 30, 30, 120, .02, .1, "neptunemap.jpg"));
-planets.push(new Planet(2, 45, 0, 0, 30, 30, 120, .02, .1, "plutomap1k.jpg"));
+planets.push(new Planet(1, 0, 0, 0, 30, 30, 180, .06, .1, "sunMap_2.jpg"));
+planets.push(new Planet(1, 4, 0, 0, 30, 30, 180, .02, .1, "mercurymap.jpg"));
+planets.push(new Planet(1, 6, 0, 0, 30, 30, 180, .02, .1, "venusmap.jpg"));
+planets.push(new Planet(1, 8, 0, 0, 30, 30, 180, .02, .1, "earthMap_2.jpg"));
+planets.push(new Planet(1, 10, 0, 0, 30, 30, 180, .02, .1, "marsmap1k.jpg"));
+planets.push(new Planet(1, 12, 0, 0, 30, 30, 180, .02, .1, "jupiterMap_2.jpg"));
+planets.push(new Planet(1, 14, 0, 0, 30, 30, 180, .02, .1, "saturnmap.jpg"));
+planets.push(new Planet(1, 16, 0, 0, 30, 30, 180, .02, .1, "uranusmap.jpg"));
+planets.push(new Planet(1, 18, 0, 0, 30, 30, 180, .02, .1, "neptunemap.jpg"));
+planets.push(new Planet(1, 20, 0, 0, 30, 30, 180, .02, .1, "plutomap1k.jpg"));
 
 function initBuffers() {
     cubeVertexPositionBuffer = gl.createBuffer();
