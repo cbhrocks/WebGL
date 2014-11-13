@@ -166,7 +166,8 @@ var Planet = (function() {
                 var v = 1 - (latNumber / this._latitudeBands);
 
                 // fill normalData witht he x y and z components of the 
-                // normal vector for each plane
+                // normal vector for each plane. if its the sun make the normals
+                // face inward so that its always lit up.
                 if (this._isSun == true){
                     this._normalData.push(-x);
                     this._normalData.push(-y);
@@ -177,7 +178,8 @@ var Planet = (function() {
                     this._normalData.push(y);
                     this._normalData.push(z);
                 }
-                // fill textureCoordData with the necessary values.
+                // fill textureCoordData with the x and y values so it knows where
+                // on the object to place the texture.
                 this._textureCoordData.push(u);
                 this._textureCoordData.push(v);
                 // fill vertexPositionData with the x y and z coordinates 
@@ -189,6 +191,8 @@ var Planet = (function() {
             }
         }
 
+        // create the index array so that the texture is mapped correctly.
+        // use 6 values so that the two points of each triangle are overlapped.
         var indexData = [];
         for (var latNumber=0; latNumber < this._latitudeBands; latNumber++) {
             for (var longNumber=0; longNumber < this._longitudeBands; longNumber++) {
@@ -507,12 +511,16 @@ function initCubeBuffers() {
 
 var cubeAngle = 0;
 
+// draw everything!
 function render() {
+    // make the viewport
     gl.viewport(0, 0, gl.viewportWidth - fieldOfView, gl.viewportHeight - fieldOfView);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+    // set the perspective in the viewport
     mat4.perspective(pMatrix, fieldOfView, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0);
 
+    // set the lighting values in the scene
     gl.uniform1i(program.useLightingUniform, true);
     gl.uniform3f(program.ambientColorUniform, 0.2, 0.2, 0.2);
     gl.uniform3f(program.pointLightingLocationUniform, 0.0, 0.0, -50.0);
@@ -553,6 +561,7 @@ function render() {
 
 var lastTime = 0;
 
+// a function that keeps track of time and updates positions based on the change in time between renders.
 function animate() {
     var timeNow = new Date().getTime();
     if (lastTime != 0) {
@@ -560,12 +569,9 @@ function animate() {
 
         for (planetNum = 0; planetNum < planets.length; planetNum++){
             planets[planetNum].rotateAndTurn(elapsed)
-            // planets[planetNum].setPlanetAngle(planets[planetNum].getPlanetAngle() + ((planetNum+1)*.01) * elapsed);
         }
 
-        // earthAngle += 0.05 * elapsed;
         cubeAngle += 0.05 * elapsed;
-        // jupiterAngle += 0.05 * elapsed;
     }
     lastTime = timeNow;
 }
@@ -597,12 +603,14 @@ function webGLStart() {
         gl.viewport(0, 0, canvas.width, canvas.height);
     }
 
+    // move the field of view farther away
     document.addEventListener('keyup', function(event) {
         if (event.keyCode == 38) {
             fieldOfView += 0.1;
         }
     });
 
+    // move the field of view closer
     document.addEventListener('keydown', function(event) {
         if (event.keyCode == 40) {
             fieldOfView -= 0.1;
