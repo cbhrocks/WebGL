@@ -17,42 +17,6 @@ function initGL(canvas) {
     if ( !gl ) { alert( "WebGL isn't available" ); }
 }
 
-//
-function getShader(gl, id) {
-    var shaderScript = document.getElementById(id);
-    if (!shaderScript) {
-        return null;
-    }
-
-    var str = "";
-    var k = shaderScript.firstChild;
-    while (k) {
-        if (k.nodeType == 3) {
-            str += k.textContent;
-        }
-        k = k.nextSibling;
-    }
-
-    var shader;
-    if (shaderScript.type == "x-shader/x-fragment") {
-        shader = gl.createShader(gl.FRAGMENT_SHADER);
-    } else if (shaderScript.type == "x-shader/x-vertex") {
-        shader = gl.createShader(gl.VERTEX_SHADER);
-    } else {
-        return null;
-    }
-
-    gl.shaderSource(shader, str);
-    gl.compileShader(shader);
-
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        alert(gl.getShaderInfoLog(shader));
-        return null;
-    }
-
-    return shader;
-}
-
 
 var program;
 
@@ -141,7 +105,7 @@ function setMatrixUniforms() {
 }
 
 
-function degToRad(degrees) {
+function radians(degrees) {
     return degrees * Math.PI / 180;
 }
 
@@ -274,11 +238,11 @@ var Planet = (function() {
         mvPushMatrix();
 
         // rotate the data based on the rotate angle in the constructor. makes it orbit
-        mat4.rotate(mvMatrix, degToRad(this._rotateAngle), [0, 1, .2]);
+        mat4.rotate(mvMatrix, radians(this._rotateAngle), [0, 1, .2]);
         // move the data based on the x y and z position in the constructor.
         mat4.translate(mvMatrix, [0 + this._xpos, 0 + this._ypos, 0 + this._zpos]);
         // rotate the data again based on the turn angle after it has been translated. makes it spin
-        mat4.rotate(mvMatrix, degToRad(this._turnAngle), [0, 1, .2]);
+        mat4.rotate(mvMatrix, radians(this._turnAngle), [0, 1, .2]);
 
         // bind the textures to the planet
         gl.activeTexture(gl.TEXTURE0);
@@ -586,7 +550,7 @@ function render() {
 
 
     mvPushMatrix();
-    mat4.rotate(mvMatrix, degToRad(cubeAngle), [0, 1, 0]);
+    mat4.rotate(mvMatrix, radians(cubeAngle), [0, 1, 0]);
     mat4.translate(mvMatrix, [5, 0, 0]);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
