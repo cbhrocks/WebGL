@@ -548,32 +548,11 @@ function render() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     mat4.perspective(pMatrix, fieldOfView, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0);
-    //mat4.perspective(fieldOfView, gl.viewportWidth/ gl.viewportHeight, 0.1, 100.0, pMatrix);
 
-    var lighting = document.getElementById("lighting").checked;
-    gl.uniform1i(program.useLightingUniform, lighting);
-    if (lighting) {
-        gl.uniform3f(
-            program.ambientColorUniform,
-            parseFloat(document.getElementById("ambientR").value),
-            parseFloat(document.getElementById("ambientG").value),
-            parseFloat(document.getElementById("ambientB").value)
-        );
-
-        gl.uniform3f(
-            program.pointLightingLocationUniform,
-            parseFloat(document.getElementById("lightPositionX").value),
-            parseFloat(document.getElementById("lightPositionY").value),
-            parseFloat(document.getElementById("lightPositionZ").value)
-        );
-
-        gl.uniform3f(
-            program.pointLightingColorUniform,
-            parseFloat(document.getElementById("pointR").value),
-            parseFloat(document.getElementById("pointG").value),
-            parseFloat(document.getElementById("pointB").value)
-        );
-    }
+    gl.uniform1i(program.useLightingUniform, true);
+    gl.uniform3f(program.ambientColorUniform, 0.2, 0.2, 0.2);
+    gl.uniform3f(program.pointLightingLocationUniform, 0.0, 0.0, -50.0);
+    gl.uniform3f(program.pointLightingColorUniform, 1.0, 1.0, 1.0);
 
     mat4.identity(mvMatrix);
 
@@ -583,11 +562,9 @@ function render() {
         planets[planetNum].drawPlanet();
     }
 
-
-
     mvPushMatrix();
     mat4.rotate(mvMatrix, degToRad(cubeAngle), [0, 1, 0]);
-    mat4.translate(mvMatrix, [5, 0, 0]);
+    mat4.translate(mvMatrix, [28, 0, 0]);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
     gl.vertexAttribPointer(program.vertexPositionAttribute, cubeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
@@ -634,16 +611,19 @@ function tick() {
     animate();
 }
 
+// Start webGL!
 function webGLStart() {
     canvas = document.getElementById( "gl-canvas" );
     ctx = canvas.getContext("experimental-webgl");
     
     window.addEventListener('resize', resizeCanvas, false);
 
+    // resize the canvas and initialize everything based on the current window size
     function resizeCanvas() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
+        // initialize all the stuff 
         initGL(canvas);
         initTextures();
         setAttributeAndUniformLocations();
