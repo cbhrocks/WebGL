@@ -23,7 +23,6 @@ var program;
 //
 //  Load shaders then set attributes and uniforms.
 //
-
 function setAttributeAndUniformLocations() {
 
     program = initShaders( gl, "vertex-shader", "fragment-shader" );
@@ -48,7 +47,9 @@ function setAttributeAndUniformLocations() {
     program.pointLightingColorUniform = gl.getUniformLocation(program, "uPointLightingColor");
 }
 
-
+//
+//  Binds the given texture and generates mipmaps for it.
+//
 function handleLoadedTexture(texture) {
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
     gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -81,12 +82,19 @@ var mvMatrix = mat4.create();
 var mvMatrixStack = [];
 var pMatrix = mat4.create();
 
+//
+//   Makes a copy of the current model-view matrix and pushes it onto the stack.
+//
 function mvPushMatrix() {
     var copy = mat4.create();
     mat4.set(mvMatrix, copy);
     mvMatrixStack.push(copy);
 }
 
+
+//
+//   Pops off the last model-view matrix on the stack.
+//
 function mvPopMatrix() {
     if (mvMatrixStack.length == 0) {
         throw "Invalid popMatrix!";
@@ -94,6 +102,10 @@ function mvPopMatrix() {
     mvMatrix = mvMatrixStack.pop();
 }
 
+//
+//   Sets the perspection and model-view matrices to their respective uniforms in the HTML file.
+//   Also uses the model-view matrix to create the normal matrix which is then set to its respective uniform in the HTML file.
+//
 function setMatrixUniforms() {
     gl.uniformMatrix4fv(program.pMatrixUniform, false, pMatrix);
     gl.uniformMatrix4fv(program.mvMatrixUniform, false, mvMatrix);
@@ -104,7 +116,9 @@ function setMatrixUniforms() {
     gl.uniformMatrix3fv(program.nMatrixUniform, false, normalMatrix);
 }
 
-
+//
+//   Converts the given degree angle into radians.
+//
 function radians(degrees) {
     return degrees * Math.PI / 180;
 }
@@ -535,7 +549,7 @@ function render() {
     }
 
     mvPushMatrix();
-    
+
     mat4.rotate(mvMatrix, radians(cubeAngle), [0, 1, 0]);
     mat4.translate(mvMatrix, [28, 0, 0]);
 
