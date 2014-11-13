@@ -6,8 +6,9 @@
 <title>Solar System</title>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 
-<script type="text/javascript" src="glMatrix-0.9.5.min.js"></script>
 <script type="text/javascript" src="./Common/webgl-utils.js"></script>
+<script type="text/javascript" src="./Common/initShaders.js"></script>
+<script type="text/javascript" src="glMatrix-0.9.5.min.js"></script>
 <script type="text/javascript" src="finalProject.js"></script>
 
 <script id="vertex-shader" type="x-shader/x-vertex">
@@ -31,14 +32,21 @@
 
 
     void main(void) {
+
+        // position of vertex with current model-view 
         vec4 mvPosition = uMVMatrix * vec4(aVertexPosition, 1.0);
 
+        // now persepective is applied
         gl_Position = uPMatrix * mvPosition;
+
         vTextureCoord = aTextureCoord;
 
         if (!uUseLighting) {
             vLightWeighting = vec3(1.0, 1.0, 1.0);
         } else {
+
+            // determine direction from point lighting position to vector position
+            // then normalize the direction vector so it has a length of 1
             vec3 lightDirection = normalize(uPointLightingLocation - mvPosition.xyz);
 
             vec3 transformedNormal = uNMatrix * aVertexNormal;
@@ -65,7 +73,7 @@
 </head>
 
 
-<body onload="webGLStart();" background="stars_texture.jpg">
+<body background="stars_texture.jpg">
     <canvas id="gl-canvas" style="border: none;" ></canvas>
     <br />
 

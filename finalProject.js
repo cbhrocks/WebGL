@@ -1,6 +1,9 @@
 /* Charles Horton, Nathan Cheung */
 
+var canvas;
 var gl;
+var ctx;
+
 var fieldOfView = 45;
 
 
@@ -11,9 +14,7 @@ function initGL(canvas) {
         gl.viewportHeight = canvas.height;
     } catch (e) {
     }
-    if (!gl) {
-        alert("Could not initialize WebGL, sorry :-(");
-    }
+    if ( !gl ) { alert( "WebGL isn't available" ); }
 }
 
 
@@ -53,40 +54,34 @@ function getShader(gl, id) {
 }
 
 
-var shaderProgram;
+var program;
 
-function initShaders() {
-    var fragmentShader = getShader(gl, "fragment-shader");
-    var vertexShader = getShader(gl, "vertex-shader");
+//
+//  Load shaders then set attributes and uniforms.
+//
 
-    shaderProgram = gl.createProgram();
-    gl.attachShader(shaderProgram, vertexShader);
-    gl.attachShader(shaderProgram, fragmentShader);
-    gl.linkProgram(shaderProgram);
+function setAttributeAndUniformLocations() {
 
-    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-        alert("Could not initialize shaders");
-    }
+    program = initShaders( gl, "vertex-shader", "fragment-shader" );
+    gl.useProgram( program );
 
-    gl.useProgram(shaderProgram);
+    program.vertexPositionAttribute = gl.getAttribLocation(program, "aVertexPosition");
+    gl.enableVertexAttribArray(program.vertexPositionAttribute);
 
-    shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
-    gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
+    program.textureCoordAttribute = gl.getAttribLocation(program, "aTextureCoord");
+    gl.enableVertexAttribArray(program.textureCoordAttribute);
 
-    shaderProgram.textureCoordAttribute = gl.getAttribLocation(shaderProgram, "aTextureCoord");
-    gl.enableVertexAttribArray(shaderProgram.textureCoordAttribute);
+    program.vertexNormalAttribute = gl.getAttribLocation(program, "aVertexNormal");
+    gl.enableVertexAttribArray(program.vertexNormalAttribute);
 
-    shaderProgram.vertexNormalAttribute = gl.getAttribLocation(shaderProgram, "aVertexNormal");
-    gl.enableVertexAttribArray(shaderProgram.vertexNormalAttribute);
-
-    shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
-    shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
-    shaderProgram.nMatrixUniform = gl.getUniformLocation(shaderProgram, "uNMatrix");
-    shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
-    shaderProgram.useLightingUniform = gl.getUniformLocation(shaderProgram, "uUseLighting");
-    shaderProgram.ambientColorUniform = gl.getUniformLocation(shaderProgram, "uAmbientColor");
-    shaderProgram.pointLightingLocationUniform = gl.getUniformLocation(shaderProgram, "uPointLightingLocation");
-    shaderProgram.pointLightingColorUniform = gl.getUniformLocation(shaderProgram, "uPointLightingColor");
+    program.pMatrixUniform = gl.getUniformLocation(program, "uPMatrix");
+    program.mvMatrixUniform = gl.getUniformLocation(program, "uMVMatrix");
+    program.nMatrixUniform = gl.getUniformLocation(program, "uNMatrix");
+    program.samplerUniform = gl.getUniformLocation(program, "uSampler");
+    program.useLightingUniform = gl.getUniformLocation(program, "uUseLighting");
+    program.ambientColorUniform = gl.getUniformLocation(program, "uAmbientColor");
+    program.pointLightingLocationUniform = gl.getUniformLocation(program, "uPointLightingLocation");
+    program.pointLightingColorUniform = gl.getUniformLocation(program, "uPointLightingColor");
 }
 
 
@@ -102,8 +97,7 @@ function handleLoadedTexture(texture) {
 }
 
 
-// var earthTexture;
-// var jupiterTexture;
+
 var crateTexture;
 
 function initTextures() {
@@ -138,13 +132,13 @@ function mvPopMatrix() {
 }
 
 function setMatrixUniforms() {
-    gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
-    gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
+    gl.uniformMatrix4fv(program.pMatrixUniform, false, pMatrix);
+    gl.uniformMatrix4fv(program.mvMatrixUniform, false, mvMatrix);
 
     var normalMatrix = mat3.create();
     mat4.toInverseMat3(mvMatrix, normalMatrix);
     mat3.transpose(normalMatrix);
-    gl.uniformMatrix3fv(shaderProgram.nMatrixUniform, false, normalMatrix);
+    gl.uniformMatrix3fv(program.nMatrixUniform, false, normalMatrix);
 }
 
 
@@ -261,16 +255,16 @@ var Planet = (function() {
 
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, this._texture);
-        gl.uniform1i(shaderProgram.samplerUniform, 0);
+        gl.uniform1i(program.samplerUniform, 0);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this._vertexPositionBuffer);
-        gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, this._vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+        gl.vertexAttribPointer(program.vertexPositionAttribute, this._vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this._vertexTextureCoordBuffer);
-        gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, this._vertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+        gl.vertexAttribPointer(program.textureCoordAttribute, this._vertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this._vertexNormalBuffer);
-        gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, this._vertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+        gl.vertexAttribPointer(program.vertexNormalAttribute, this._vertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._vertexIndexBuffer);
         setMatrixUniforms();
@@ -334,7 +328,7 @@ planets.push(new Planet(2, 40, 0, 0, 30, 30, 120, .02, .1, "neptunemap.jpg"));
 planets.push(new Planet(2, 45, 0, 0, 30, 30, 120, .02, .1, "plutomap1k.jpg"));
 
 
-function initBuffers() {
+function initCubeBuffers() {
     cubeVertexPositionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
     vertices = [
@@ -485,7 +479,7 @@ function initBuffers() {
 
 var cubeAngle = 0;
 
-function drawScene() {
+function render() {
     gl.viewport(0, 0, gl.viewportWidth - fieldOfView, gl.viewportHeight - fieldOfView);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -493,24 +487,24 @@ function drawScene() {
     //mat4.perspective(fieldOfView, gl.viewportWidth/ gl.viewportHeight, 0.1, 100.0, pMatrix);
 
     var lighting = document.getElementById("lighting").checked;
-    gl.uniform1i(shaderProgram.useLightingUniform, lighting);
+    gl.uniform1i(program.useLightingUniform, lighting);
     if (lighting) {
         gl.uniform3f(
-            shaderProgram.ambientColorUniform,
+            program.ambientColorUniform,
             parseFloat(document.getElementById("ambientR").value),
             parseFloat(document.getElementById("ambientG").value),
             parseFloat(document.getElementById("ambientB").value)
         );
 
         gl.uniform3f(
-            shaderProgram.pointLightingLocationUniform,
+            program.pointLightingLocationUniform,
             parseFloat(document.getElementById("lightPositionX").value),
             parseFloat(document.getElementById("lightPositionY").value),
             parseFloat(document.getElementById("lightPositionZ").value)
         );
 
         gl.uniform3f(
-            shaderProgram.pointLightingColorUniform,
+            program.pointLightingColorUniform,
             parseFloat(document.getElementById("pointR").value),
             parseFloat(document.getElementById("pointG").value),
             parseFloat(document.getElementById("pointB").value)
@@ -532,17 +526,17 @@ function drawScene() {
     mat4.translate(mvMatrix, [5, 0, 0]);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
-    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, cubeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(program.vertexPositionAttribute, cubeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexNormalBuffer);
-    gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, cubeVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(program.vertexNormalAttribute, cubeVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexTextureCoordBuffer);
-    gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, cubeVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(program.textureCoordAttribute, cubeVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, crateTexture);
-    gl.uniform1i(shaderProgram.samplerUniform, 0);
+    gl.uniform1i(program.samplerUniform, 0);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
     setMatrixUniforms();
@@ -570,52 +564,15 @@ function animate() {
     lastTime = timeNow;
 }
 
-function makeXRotation(angleInRadians) {
-  var c = Math.cos(angleInRadians);
-  var s = Math.sin(angleInRadians);
-
-  return [
-    1, 0, 0, 0,
-    0, c, s, 0,
-    0, -s, c, 0,
-    0, 0, 0, 1
-  ];
-};
-
-function makeYRotation(angleInRadians) {
-  var c = Math.cos(angleInRadians);
-  var s = Math.sin(angleInRadians);
-
-  return [
-    c, 0, -s, 0,
-    0, 1, 0, 0,
-    s, 0, c, 0,
-    0, 0, 0, 1
-  ];
-};
-
-function makeZRotation(angleInRadians) {
-  var c = Math.cos(angleInRadians);
-  var s = Math.sin(angleInRadians);
-  return [
-     c, s, 0, 0,
-    -s, c, 0, 0,
-     0, 0, 1, 0,
-     0, 0, 0, 1,
-  ];
-}
-
-
-
 function tick() {
     requestAnimFrame(tick);
-    drawScene();
+    render();
     animate();
 }
 
-function webGLStart() {
-    var canvas = document.getElementById("gl-canvas");
-    var ctx = canvas.getContext('experimental-webgl');
+window.onload = function init() {
+    canvas = document.getElementById( "gl-canvas" );
+    ctx = canvas.getContext("experimental-webgl");
     
     window.addEventListener('resize', resizeCanvas, false);
 
@@ -623,15 +580,10 @@ function webGLStart() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
-        // perspective = mat4.create();
-        // perspective = mat4.perspective(60, canvas.width / canvas.height, 0.1, 100);
-        // perspective[3][3] = 1;
-        // perspective = mat4.multiply(perspective,(mat4.create(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, -5, 0, 0, 0, 1)));
-
         initGL(canvas);
         initTextures();
-        initShaders();
-        initBuffers();
+        setAttributeAndUniformLocations();
+        initCubeBuffers();
 
         gl.viewport(0, 0, canvas.width, canvas.height);
     }
@@ -654,4 +606,4 @@ function webGLStart() {
     gl.enable(gl.DEPTH_TEST);
 
     tick();
-}
+};
