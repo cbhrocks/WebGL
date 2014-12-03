@@ -363,7 +363,7 @@ var cubeVertexIndexBuffer;
 
 //create the planets array that holds all of the planet objects, and fill it with new planets.
 var planets = [];
-planets.push(new Planet(4, 0, 0, 0, 30, 30, 180, .06, .1, true, "sunMap.jpg"));
+planets.push(new Planet(4, 0, 0, 0, 30, 30, 180, .06, .1, true, "sunMap2.jpg"));
 planets.push(new Planet(1, 4+4, 0, 0, 30, 30, 180, .02, .2, false, "mercurymap.jpg"));
 planets.push(new Planet(1, 6+4, 0, 0, 30, 30, 180, .06, .4, false, "venusmap.jpg"));
 planets.push(new Planet(1, 8+4, 0, 0, 30, 30, 180, .034, .13, false, "earthMap.jpg"));
