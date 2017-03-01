@@ -103,7 +103,7 @@ window.onload = function init()
 function render()
 {
     gl.clear( gl.COLOR_BUFER_BIT | gl.DEPTH_BUFFER_BIT);
-	theta[axis] += 1.0;g
+	theta[axis] += 1.0;
 	gl.uniform3fv (thetaLoc, flatten(theta));
 	for (var i=0; i<6; i++) {
 		gl.uniform4fv (colorLoc, colors[i]);

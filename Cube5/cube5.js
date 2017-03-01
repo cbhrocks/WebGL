@@ -14,9 +14,8 @@ var c = [];
 var s = [];
 
 var cubeSize = 10;
-var cubeSize2 = cubeSize / 2.0;
-var windowMin = -cubeSize2;
-var windowMax = cubeSize + cubeSize2;
+var windowMin = -(cubeSize/2);
+var windowMax = cubeSize + cubeSize/2;
 
 var xAxis = 0;
 var yAxis = 1;
@@ -75,7 +74,7 @@ window.onload = function init()
     gl.viewport( 0, 0, canvas.width, canvas.height );
     gl.clearColor( 0.7, 0.7, 0.7, 1.0 );
 	gl.enable(gl.DEPTH_TEST);
-	projection = ortho (windowMin, windowMax, windowMin, windowMax, windowMin, windowMax+cubeSize);
+	projection = ortho (windowMin, windowMax, windowMin, windowMax, windowMin, windowMax);
 	
 	// Register event listeners for the buttons
 	
@@ -138,14 +137,14 @@ function render()
 			   0.0, 0.0, 1.0, 0.0,
 			   0.0, 0.0, 0.0, 1.0);
 	
-	tz1 = mat4 (1.0, 0.0, 0.0, -cubeSize2,
-			   0.0, 1.0, 0.0, -cubeSize2,
-			   0.0, 0.0, 1.0, -cubeSize2,
+	tz1 = mat4 (1.0, 0.0, 0.0, -cubeSize/2,
+			   0.0, 1.0, 0.0, -cubeSize/2,
+			   0.0, 0.0, 1.0, -cubeSize/2,
 			   0.0, 0.0, 0.0, 1.0);
 			   
-	tz2 = mat4 (1.0, 0.0, 0.0, cubeSize2,
-			   0.0, 1.0, 0.0, cubeSize2,
-			   0.0, 0.0, 1.0, cubeSize2,
+	tz2 = mat4 (1.0, 0.0, 0.0, cubeSize/2,
+			   0.0, 1.0, 0.0, cubeSize/2,
+			   0.0, 0.0, 1.0, cubeSize/2,
 			   0.0, 0.0, 0.0, 1.0);
 	
 	tz3 = mat4 (1.0, 0.0, 0.0, 0.0,
